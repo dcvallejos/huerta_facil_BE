@@ -4,11 +4,14 @@
 
 const userController = {
   'login': function (req, res) {
-    // logica
 
   },
   'createUser': function (req, res) {
 
+    const send = {
+      "data": {}
+    }
+    res.send('hola')
   },
   'getFavs': function (req, res) {
     

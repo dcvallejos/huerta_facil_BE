@@ -4,7 +4,7 @@ const { login, createUser, getFavs, updateUser, deleteUser } = require('../contr
 
 
 router.post('/login', login)
-router.post('/register', createUser)
+router.post('/createUser', createUser)
 
 router.get('/getFavs', getFavs) // ver qué enviar -> datos de sesión?
 
