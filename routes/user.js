@@ -2,14 +2,15 @@ const express = require('express');
 const router = express.Router();
 const { login, createUser, getFavs, setFav, updateUser, deleteUser } = require('../controllers/userController')
 const validations = require('../utils/registerVal.js')
-const plantValidations = require('../utils/plantVal.js')
+const idValidations = require('../utils/plantVal.js')
 const favsValidations = require('../utils/favsVal.js')
-const { checkSchema, validationResult } = require('express-validator')
+const delUserValidations = require('../utils/deleteUserVal.js')
+const { body, checkSchema, validationResult } = require('express-validator')
 
 router.post('/login', login)
 router.post('/createUser', checkSchema(validations), function (req, res) {
   const invalid = validationResult(req)
-  if (invalid) {
+  if (!invalid.isEmpty()) {
     const send = {
       "errors": invalid
     }
@@ -20,7 +21,7 @@ router.post('/createUser', checkSchema(validations), function (req, res) {
   }
 })
 
-router.get('/getFavs/:id', plantValidations, function (req, res) {
+router.get('/getFavs/:id', idValidations, function (req, res) {
   const invalid = validationResult(req)
   console.log(invalid)
   if (invalid.errors.length > 0) {
@@ -32,7 +33,7 @@ router.get('/getFavs/:id', plantValidations, function (req, res) {
 
 router.post('/setFav/', checkSchema(favsValidations), function (req, res) {
   const invalid = validationResult(req)
-  if (invalid) {
+  if (!invalid.isEmpty()) {
     const send = {
       "errors": invalid
     }
@@ -45,6 +46,15 @@ router.post('/setFav/', checkSchema(favsValidations), function (req, res) {
 
 router.put('/updateUser', updateUser)
 
-router.delete('/deleteUser', deleteUser)
 
+router.delete('/deleteUser', checkSchema(delUserValidations), function (req, res) {
+  const invalid = validationResult(req)
+  console.log(invalid)
+  if (!invalid.isEmpty()) {
+    res.send(invalid)
+  }
+  else {
+    deleteUser(req, res)
+  }
+})
 module.exports = router;
