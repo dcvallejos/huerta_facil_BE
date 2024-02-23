@@ -10,11 +10,11 @@ const userController = {
 
     const send = {}
     const usuario = req.body.usuario,
-          provincia = req.body.provincia,
-          password = req.body.password;
+      provincia = req.body.provincia,
+      password = req.body.password;
 
     const test = await sql`SELECT * FROM usuarios WHERE usuario = ${usuario}`
-    if(test.length >= 1){
+    if (test.length >= 1) {
       send.errors = []
       const err = {
         "status": 409,
@@ -30,12 +30,35 @@ const userController = {
       }
       res.send(send)
     }
-    
-  },
-  'getFavs': function (req, res) {
-    
-  
 
+  },
+  'getFavs': async function (req, res) {
+    const send = {}
+    var userId = req.params.userId
+    const test = await sql `SELECT checkUserById(${userId})`
+    const data = await sql`SELECT * FROM getFavs(${userId})`
+
+
+    if (test.length === 0) {
+      send.errors = []
+      const err = {
+        "msg": "El usuario no existe"
+      }
+      send.errors.push(err)
+      res.send(send)
+    }
+    else if (data.length === 0) {
+      send.errors = []
+      const err = {
+        "msg": "El usuario no tiene favoritos"
+      }
+      send.errors.push(err)
+      res.send(send)
+    }
+    else {
+      send.data = data
+      res.send(send)
+    }
   },
   'updateUser': function (req, res) {
 

@@ -18,7 +18,7 @@ router.post('/createUser', checkSchema(validations), function(req, res){
   }
 })
 
-router.get('/getFavs', getFavs) // ver qué enviar -> datos de sesión?
+router.get('/getFavs/:userId', getFavs) // ver qué enviar -> datos de sesión?
 
 router.put('/updateUser', updateUser)
 
