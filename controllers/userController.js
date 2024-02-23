@@ -11,10 +11,12 @@ const userController = {
     const send = {}
     const usuario = req.body.usuario,
       provincia = req.body.provincia,
-      password = req.body.password;
+      password = req.body.password,
+      nombre = req.body.nombre;
 
     const test = await sql`SELECT checkUserName(${usuario})`
     if (test.length >= 1) {
+      console.log(test.length)
       send.errors = []
       const err = {
         "status": 409,
@@ -24,7 +26,8 @@ const userController = {
       send.errors.push(err)
       res.send(send)
     } else {
-      await sql`SELECT createUser(${usuario}, ${provincia}, ${password})`
+      console.log(test.length)
+      await sql`SELECT createUser(${usuario}, ${provincia}, ${password}, ${nombre})`
       send.data = {
         "message": 'Usuario registrado'
       }
@@ -35,7 +38,7 @@ const userController = {
   'getFavs': async function (req, res) {
     const send = {}
     var userId = req.params.id
-    const test = await sql `SELECT checkUserById(${userId})`
+    const test = await sql`SELECT checkUserById(${userId})`
     const data = await sql`SELECT * FROM getFavs(${userId})`
 
 
@@ -68,9 +71,9 @@ const userController = {
     const send = {}
     var id_usuario = req.body.id_usuario
     var id_especie = req.body.id_especie
-    const userTest = await sql `SELECT checkUserById(${id_usuario})`
-    const plantTest = await sql `SELECT * FROM getById(${id_especie})`
-    
+    const userTest = await sql`SELECT checkUserById(${id_usuario})`
+    const plantTest = await sql`SELECT * FROM getById(${id_especie})`
+
     if (userTest.length === 0) {
       send.errors = []
       const err = {
@@ -92,28 +95,28 @@ const userController = {
       res.send(send)
     }
     else {
-      try{
-        await sql `SELECT setFav(${id_usuario},${id_especie})`    
+      try {
+        await sql`SELECT setFav(${id_usuario},${id_especie})`
         send.data = {
-        "status": 200,
-        "title": "Transaction OK",
-        "message": 'Favorito agregado'
+          "status": 200,
+          "title": "Transaction OK",
+          "message": 'Favorito agregado'
         }
         res.send(send)
       }
-      catch{
-      send.errors = []
-      const err = {
-        "status": 409,
-        "title": "Conflict",
-        "message": "La planta ya esta agregada en el listado de favoritos del usuario"
+      catch {
+        send.errors = []
+        const err = {
+          "status": 409,
+          "title": "Conflict",
+          "message": "La planta ya esta agregada en el listado de favoritos del usuario"
+        }
+        send.errors.push(err)
+        res.send(send)
       }
-      send.errors.push(err)
-      res.send(send)
-      }
-    }    
-  },  
-  
+    }
+  },
+
   'updateUser': function (req, res) {
 
   },
@@ -123,8 +126,8 @@ const userController = {
   'deleteUser': async function (req, res) {
     const send = {}
     var id_usuario = req.body.id_usuario
-    const userTest = await sql `SELECT checkUserById(${id_usuario})`
-    
+    const userTest = await sql`SELECT checkUserById(${id_usuario})`
+
     if (userTest.length === 0) {
       send.errors = []
       const err = {
@@ -136,26 +139,26 @@ const userController = {
       res.send(send)
     }
     else {
-      try{
-        await sql `SELECT deleteUser(${id_usuario})`    
+      try {
+        await sql`SELECT deleteUser(${id_usuario})`
         send.data = {
-        "status": 200,
-        "title": "Transaction OK",
-        "message": 'Usuario correctamente eliminado'
+          "status": 200,
+          "title": "Transaction OK",
+          "message": 'Usuario correctamente eliminado'
         }
         res.send(send)
       }
-      catch{
-      send.errors = []
-      const err = {
-        "status": 500,
-        "title": "Internal error",
-        "message": "Error del servidor, contáctese con el administrador"
+      catch {
+        send.errors = []
+        const err = {
+          "status": 500,
+          "title": "Internal error",
+          "message": "Error del servidor, contáctese con el administrador"
+        }
+        send.errors.push(err)
+        res.send(send)
       }
-      send.errors.push(err)
-      res.send(send)
-      }
-    }    
+    }
   }
 }
 

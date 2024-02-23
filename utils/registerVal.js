@@ -34,9 +34,16 @@ password: {
     },
     errorMessage: "La contraseña debe tener entre 5 y 24 caracteres, al menos una mayúscula, una minúscula, un número y un caracter especial."
   }
+},
+nombre: {
+  notEmpty: {
+    errorMessage: 'Campo obligatorio',
+    bail: true
+  },
+  isString: {
+    errorMessage: 'Indique bien su nombre'
+  }
+  }
 }
-
-}
-
 
 module.exports = validations
