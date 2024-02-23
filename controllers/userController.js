@@ -13,7 +13,7 @@ const userController = {
       provincia = req.body.provincia,
       password = req.body.password;
 
-    const test = await sql`SELECT * FROM usuarios WHERE usuario = ${usuario}`
+    const test = await sql`SELECT checkUserName(${usuario})`
     if (test.length >= 1) {
       send.errors = []
       const err = {
