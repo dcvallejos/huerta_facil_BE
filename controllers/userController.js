@@ -11,8 +11,6 @@ const userController = {
 
   },
   'getFavs': function (req, res) {
-    
-    res.send("pelele")
 
   },
   'updateUser': function (req, res) {

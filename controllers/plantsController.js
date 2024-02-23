@@ -7,9 +7,7 @@ const plantsController = {
 'getPlantsById': function(req, res){
 
 },
-'getAllCards': async function(req, res){
-const test = await sql `SELECT * FROM obtener_datos_especies()`
-res.send(test)
+'getCards': async function(req, res){
 
 },
 'filterBy': function(req, res){
