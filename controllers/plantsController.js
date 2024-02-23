@@ -10,9 +10,9 @@ const data = await sql `SELECT * FROM getByID(${id})`
 
 if(data.length === 0){
   const send = {
-    "errors": {
+    "errors":[ {
       "msg": "No se encontraron registros"
-    }
+    }]
   }
   res.send(send)
 } else {
@@ -24,12 +24,9 @@ if(data.length === 0){
 
 },
 'getAllCards': async function(req, res){
-const test = await sql `SELECT * FROM obtener_datos_especies()`
-res.send(test)
 
 },
 'filterBy': function(req, res){
-  
 }
 }
 
