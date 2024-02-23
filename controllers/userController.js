@@ -34,7 +34,7 @@ const userController = {
   },
   'getFavs': async function (req, res) {
     const send = {}
-    var userId = req.params.userId
+    var userId = req.params.id
     const test = await sql `SELECT checkUserById(${userId})`
     const data = await sql`SELECT * FROM getFavs(${userId})`
 
@@ -42,7 +42,9 @@ const userController = {
     if (test.length === 0) {
       send.errors = []
       const err = {
-        "msg": "El usuario no existe"
+        "status": 404,
+        "title": "Not Found",
+        "message": "El usuario no existe"
       }
       send.errors.push(err)
       res.send(send)
@@ -50,7 +52,9 @@ const userController = {
     else if (data.length === 0) {
       send.errors = []
       const err = {
-        "msg": "El usuario no tiene favoritos"
+        "status": 404,
+        "title": "Not Found",
+        "message": "El usuario no tiene favoritos"
       }
       send.errors.push(err)
       res.send(send)

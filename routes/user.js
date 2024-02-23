@@ -1,15 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const { login, createUser, getFavs,setFav, updateUser, deleteUser } = require('../controllers/userController')
+const { login, createUser, getFavs, setFav, updateUser, deleteUser } = require('../controllers/userController')
 const validations = require('../utils/registerVal.js')
-const {checkSchema, validationResult } = require('express-validator')
+const plantValidators = require('../utils/plantVal.js')
+const { checkSchema, validationResult } = require('express-validator')
 
 router.post('/login', login)
-router.post('/createUser', checkSchema(validations), function(req, res){
+router.post('/createUser', checkSchema(validations), function (req, res) {
   const invalid = validationResult(req)
-  if(invalid.length > 0){
+  if (invalid.length > 0) {
     const send = {
-      "erorrs": invalid
+      "errors": invalid
     }
     res.send(send)
   }
@@ -18,7 +19,15 @@ router.post('/createUser', checkSchema(validations), function(req, res){
   }
 })
 
-router.get('/getFavs/:userId', getFavs) // ver qué enviar -> datos de sesión?
+router.get('/getFavs/:id', plantValidators, function (req, res) {
+  const invalid = validationResult(req)
+  console.log(invalid)
+  if (invalid.errors.length > 0) {
+    res.send(invalid)
+  } else {
+    getFavs(req, res)
+  }
+})
 
 router.post('/setFav/', setFav)
 
