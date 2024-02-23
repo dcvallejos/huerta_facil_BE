@@ -12,7 +12,14 @@ require('dotenv').config()
 const sql = require('./connection.js')
 
 const connectDB = async () => {
- 
+  const con = await sql`SELECT * FROM especies`
+  try {
+    if(con){
+      console.log('Conectado a BD')
+    }
+  } catch (error) {
+    console.log(`ERROR DE CONEXIÓN: ${error}`)
+  }
 } 
 
 connectDB()
