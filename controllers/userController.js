@@ -116,9 +116,14 @@ const userController = {
       }
     }
   },
-
   'updateUser': function (req, res) {
+    const usuario = req.body.usuario || null
+    const provincia = req.body.provincia || null
+    const password = req.body.password || null
+    const nombreUsuario = req.body.nombreUsuario || null
 
+    console.log(usuario, provincia, password, nombreUsuario)
+    res.send('fin')
   },
 
   /*  Elimina un usuario pasado dentro del elemento del body "id_usuario" y activa un trigger 

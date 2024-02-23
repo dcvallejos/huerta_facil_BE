@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { login, createUser, getFavs, setFav, updateUser, deleteUser } = require('../controllers/userController')
 const validations = require('../utils/registerVal.js')
 const idValidations = require('../utils/plantVal.js')
 const favsValidations = require('../utils/favsVal.js')
 const delUserValidations = require('../utils/deleteUserVal.js')
+const updateUserValidations = require('../utils/updateUserVal.js')
 const { body, checkSchema, validationResult } = require('express-validator')
+const { login, createUser, getFavs, setFav, updateUser, deleteUser } = require('../controllers/userController')
 
 router.post('/login', login)
 router.post('/createUser', checkSchema(validations), function (req, res) {
@@ -44,7 +45,12 @@ router.post('/setFav/', checkSchema(favsValidations), function (req, res) {
   }
 })
 
-router.put('/updateUser', updateUser)
+router.put('/updateUser', checkSchema(updateUserValidations), function(req,res){
+
+const data = validationResult(req)
+res.send(data)
+// updateUser(req, res)
+})
 
 
 router.delete('/deleteUser', checkSchema(delUserValidations), function (req, res) {
