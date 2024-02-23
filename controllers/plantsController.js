@@ -23,8 +23,10 @@ if(data.length === 0){
 }
 
 },
-'getAllCards': async function(req, res){
-
+'getCards': async function(req, res){
+// agregar lógica de paginado
+const data = await sql`SELECT * FROM getCards()`
+res.send(data)
 },
 'filterBy': function(req, res){
 }
