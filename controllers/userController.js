@@ -117,8 +117,45 @@ const userController = {
   'updateUser': function (req, res) {
 
   },
-  'deleteUser': function (req, res) {
 
+  /*  Elimina un usuario pasado dentro del elemento del body "id_usuario" y activa un trigger 
+      que elimina previamente todos sus favoritos */
+  'deleteUser': async function (req, res) {
+    const send = {}
+    var id_usuario = req.body.id_usuario
+    const userTest = await sql `SELECT checkUserById(${id_usuario})`
+    
+    if (userTest.length === 0) {
+      send.errors = []
+      const err = {
+        "status": 404,
+        "title": "Not found",
+        "message": "El usuario no existe"
+      }
+      send.errors.push(err)
+      res.send(send)
+    }
+    else {
+      try{
+        await sql `SELECT deleteUser(${id_usuario})`    
+        send.data = {
+        "status": 200,
+        "title": "Transaction OK",
+        "message": 'Usuario correctamente eliminado'
+        }
+        res.send(send)
+      }
+      catch{
+      send.errors = []
+      const err = {
+        "status": 500,
+        "title": "Internal error",
+        "message": "Error del servidor, contáctese con el administrador"
+      }
+      send.errors.push(err)
+      res.send(send)
+      }
+    }    
   }
 }
 
