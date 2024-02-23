@@ -1,5 +1,3 @@
-const { param } = require('express-validator')
-
 const validations = {
   id_usuario :  {
     custom:{
@@ -29,8 +27,7 @@ const validations = {
     },
     isInt: {
       errorMessage: 'Ingrese el numero correcto del Id de la especie'
-    },
-    
+    },    
   }
 }
 
