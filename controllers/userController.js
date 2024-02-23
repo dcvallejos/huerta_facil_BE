@@ -33,6 +33,8 @@ const userController = {
     
   },
   'getFavs': function (req, res) {
+    
+  
 
   },
   'updateUser': function (req, res) {
@@ -45,3 +47,7 @@ const userController = {
 
 
 module.exports = userController;
+
+
+/*updateUser(id_usuario_[int], usuario [string] (optional), provincia [string] (optional), password [string] (optional))
+En base a un id_usuario, se puede modificar opcionalmente cualquier registro del mismo (dejar NULL en los espacios que no se quiera modificar nada) */
