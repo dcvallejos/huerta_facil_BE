@@ -1,10 +1,22 @@
 const express = require('express');
 const router = express.Router();
 const { login, createUser, getFavs, updateUser, deleteUser } = require('../controllers/userController')
-
+const validations = require('../utils/registerVal.js')
+const {checkSchema, validationResult } = require('express-validator')
 
 router.post('/login', login)
-router.post('/createUser', createUser)
+router.post('/createUser', checkSchema(validations), function(req, res){
+  const invalid = validationResult(req)
+  if(invalid.length > 0){
+    const send = {
+      "erorrs": invalid
+    }
+    res.send(send)
+  }
+  else {
+    createUser(req, res)
+  }
+})
 
 router.get('/getFavs', getFavs) // ver qué enviar -> datos de sesión?
 
