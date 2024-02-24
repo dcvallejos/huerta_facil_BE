@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { login, createUser, getFavs, setFav, updateUser, deleteUser } = require('../controllers/userController')
+const { login, createUser, getFavs, setFav, updateUser, deleteUser, getProvincias } = require('../controllers/userController')
 const validations = require('../utils/registerVal.js')
 const idValidations = require('../utils/plantVal.js')
 const favsValidations = require('../utils/favsVal.js')
@@ -20,6 +20,8 @@ router.post('/createUser', checkSchema(validations), function (req, res) {
     createUser(req, res)
   }
 })
+
+router.get('/getProvincias', getProvincias)
 
 router.get('/getFavs/:id', idValidations, function (req, res) {
   const invalid = validationResult(req)
