@@ -1,11 +1,12 @@
 const checkPass = (pass2, { req }) => {
-  if (!req.body.password) {
+  const {password} = req.body
+  if (!password) {
     return true
   }
-  if(!pass2 && req.body.password){
-    throw new Error('Debe especificar una nueva contraseña')
+  if(!pass2 && password){
+    throw new Error('Debe repetir el password')
   } 
-  if(pass2 !== req.body.password){
+  if(pass2 !== password){
     throw new Error('Las contraseñas no coinciden')
   } 
   return true
@@ -13,14 +14,15 @@ const checkPass = (pass2, { req }) => {
 
 const checkBody = (val, {req}) =>{
   const body = req.body
-  const props = Object.entries(body).length
+  const bodyLength = Object.entries(body).length
 
-  if(props === 0){
-    throw new Error ('Debe especificar al menos un campo')
+  if(bodyLength === 0){
+    throw new Error('Entró en no tiene nada')
   } 
-  if(Object.hasOwn(body, "passwordRepetido") && props === 1){
-    throw new Error('Debe especificar al menos un campo')
-  }
+  const entries = Object.entries(body).some(el => el[1])
+  if(!entries){
+    throw new Error("Entró en empty fields")
+  } 
   return true
 }
 
@@ -33,7 +35,7 @@ const validations = {
       }
     },
     isEmail: {
-      messageError: "Email inválido"
+      errorMessage: "Email inválido"
     }
   },
   provincia: {
@@ -50,28 +52,6 @@ const validations = {
   }, 
   nombreUsuario: {
 
-  },
-  password:{
-    optional: {
-      options: {
-        values: 'falsy'
-      }
-    },
-    isStrongPassword: {
-      options: {minLength: 5,
-      maxLength: 24,
-      minLowercase: 1,
-      minUppercase: 1,
-      minNumbers: 1,
-      minSymbols: 1
-      },
-      errorMessage: "La contraseña debe tener entre 5 y 24 caracteres, al menos una mayúscula, una minúscula, un número y un caracter especial."
-    }
-  },
-  passwordRepetido:{
-    custom: {
-      options: checkPass
-    }
   },
   custom: {
     custom: {
