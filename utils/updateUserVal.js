@@ -17,11 +17,11 @@ const checkBody = (val, {req}) =>{
   const bodyLength = Object.entries(body).length
 
   if(bodyLength === 0){
-    throw new Error('Entró en no tiene nada')
+    throw new Error()
   } 
   const entries = Object.entries(body).some(el => el[1])
   if(!entries){
-    throw new Error("Entró en empty fields")
+    throw new Error()
   } 
   return true
 }

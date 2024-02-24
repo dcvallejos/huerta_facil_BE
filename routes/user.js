@@ -48,21 +48,19 @@ router.post('/setFav/', checkSchema(favsValidations), function (req, res) {
 router.put('/updateUser', checkSchema(updateUserValidations), function(req,res){
 
 const data = validationResult(req)
-// if(data.errors.some(el => el.path === 'custom')){
-//   return res.status(400).json({
-//     errors: [
-//       {
-//         status: '400',
-//         title: 'Bad Request',
-//         detail: 'Debe especificar al menos un campo entre los siguientes: usuario, provincia, nombreUsuario, password'
-//       }
-//     ]
-//   });
-// } else {
-//   res.send(data)
-// }
-
-res.send(data)
+if(data.errors.some(el => el.path === 'custom')){
+  return res.status(400).json({
+    errors: [
+      {
+        status: '400',
+        title: 'Bad Request',
+        detail: 'Debe especificar al menos un campo entre los siguientes: usuario, provincia, nombreUsuario, password'
+      }
+    ]
+  });
+} else {
+  res.send(data)
+}
 })
 
 // updateUser(req, res)
