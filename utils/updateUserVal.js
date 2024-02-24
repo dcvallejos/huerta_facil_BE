@@ -1,14 +1,14 @@
-const checkPass = (pass2) => {
-  return typeof !validations.password === 'null'
-  // if(validations.password){
-  //   if(validations.password === pass2){
-  //     return true
-  //   } else {
-  //     throw new Error('Las contraseñas no coinciden')
-  //   }
-  // } else {
-  //   throw new Error('Debe especificar una nueva contraseña!')
-  // }
+const checkPass = (pass2, { req }) => {
+  if (!req.body.password) {
+    return true
+  }
+  if(!pass2 && req.body.password){
+    throw new Error('Debe especificar una nueva contraseña')
+  } 
+  if(pass2 !== req.body.password){
+    throw new Error('Las contraseñas no coinciden')
+  } 
+  return true
 }
 
 
