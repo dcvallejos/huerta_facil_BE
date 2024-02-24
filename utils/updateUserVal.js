@@ -1,6 +1,8 @@
 const checkPass = (nuevoPassword, { req }) => {
   const {repetirPassword} = req.body.password
-  return nuevoPassword === repetirPassword
+  if(nuevoPassword !== repetirPassword){
+    throw new Error('Las contraseñas no coinciden')
+  } else return true
   
 }
 
@@ -15,6 +17,24 @@ const checkBody = (val, {req}) =>{
   return true
 }
 
+const checkPassObj = (nuevoPass, {req}) => {
+  const passwordObj = req.body.password
+  if(passwordObj){
+    if(!Object.hasOwn(passwordObj, "nuevoPassword") && !Object.hasOwn(passwordObj, "repetirPassword")){
+      throw new Error('Error de estructura: El objeto password debe contener nuevoPassword y repetirPassword')
+    }
+    if(!passwordObj.nuevoPassword || !passwordObj.repetirPassword){
+      throw new Error('Campos obligatorios')
+    }
+  }
+  return true
+}
+
+const checkAllPass =(val, {req}) => {
+  checkPassObj(val, {req})
+  checkPass(val, {req})
+  return true
+}
 
 const validations = {
   usuario: {
@@ -40,23 +60,28 @@ const validations = {
       errorMessage: 'Provincia inválida'  
   }, 
   nombreUsuario: {
-
+    optional: {
+      options: {
+        values: 'falsy'
+      }
   },
+  matches: {
+    options: /^[a-zA-Z\s.]*$/,
+    errorMessage: 'El nombre solo puede contener letras, espacios y puntos'
+  }
+},
   password: {
-    isObject: {
+    optional: {
+      options: {
+        values: 'falsy'
+      }
+    },
+      isObject: {
       errorMessage: "Campo inválido. Debe enviar un objeto",
       bail: true
     }
-  },
+},
   "password.nuevoPassword": {
-    exists: {
-      errorMessage: "Error de estructura: password debe contener nuevoPassword",
-      bail: true
-    },
-    notEmpty:{
-      errorMessage: "Campo obligatorio",
-      bail: true
-    },
     isStrongPassword: {
       options: {
         minLength: 5,
@@ -69,18 +94,7 @@ const validations = {
       errorMessage: "La contraseña debe contener entre 5 y 24 caracteres, al menos una minúscula, una mayúscula, un número y un caracter especial"
     },
     custom: {
-      options : checkPass,
-      errorMessage: "Las contraseñas no coinciden",
-      bail: true
-    }
-  },
-  "password.repetirPassword": {
-    exists: {
-      errorMessage: "Error de estructura: password debe contener repetirPassword",
-      bail: true
-    },
-    notEmpty:{
-      errorMessage: "Campo obligatorio",
+      options : checkAllPass,
       bail: true
     }
   },
