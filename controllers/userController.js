@@ -34,12 +34,12 @@ const userController = {
   'createUser': async function (req, res) {
 
     const send = {}
-    const usuario = req.body.usuario,
+    const email = req.body.email,
       provincia = req.body.provincia,
       password = req.body.password,
       nombre = req.body.nombre;
 
-    const test = await sql`SELECT checkUserName(${usuario})`
+    const test = await sql`SELECT checkUserName(${email})`
     if (test.length >= 1) {
       console.log(test.length)
       send.errors = []
@@ -52,10 +52,8 @@ const userController = {
       res.send(send)
     } else {
       console.log(test.length)
-      await sql`SELECT createUser(${usuario}, ${provincia}, ${password}, ${nombre})`
-      send.data = {
-        "message": 'Usuario registrado'
-      }
+      await sql`SELECT createUser(${email}, ${provincia}, ${password}, ${nombre})`
+      send.data = {type: 'response', attributes: {status: "200", title: "Transaction OK", message: 'Usuario creado correctamente'}}
       res.send(send)
     }
 
