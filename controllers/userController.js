@@ -1,10 +1,35 @@
 // llamar a la conexión 
 const sql = require('../connection.js')
+const bcrypt = require('bcrypt')
+const { generateToken } = require('../utils/token')
+
+
 
 
 const userController = {
-  'login': function (req, res) {
+  'login': async function (req, res) {
+    const usuario = req.body.usuario
+    const password = req.body.password
+    const send = {}
+    const data = await sql `SELECT * FROM usuarios WHERE usuario = ${usuario}`
 
+    if(data.length === 0){
+      send.errors = [{status: "409", title: "Conflict", message: 'El usuario no existe' }]
+      res.send(send)
+    } else {
+      const user = data[0]
+
+      if(bcrypt.compareSync(password, user.pass)){
+        const token = generateToken(user)
+        send.data = {type: 'response', attributes: {status: "200", title: "Transaction OK", message: 'Sesión iniciada', token: token}}
+      }
+      else { 
+        send.errors = [{status: "409", title: "Conflict", message: 'Contraseña incorrecta' }]
+      }
+      res.send(send)
+    }
+    
+    
   },
   'createUser': async function (req, res) {
 
