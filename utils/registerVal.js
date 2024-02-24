@@ -1,11 +1,19 @@
 const validations = {
-usuario: {
+email: {
   notEmpty: {
     errorMessage: 'Campo obligatorio',
     bail: true
   },
   isEmail: {
-    errorMessage: 'Email inválido'
+    errorMessage: 'Email inválido',
+    bail: true
+  },
+  isLength: {
+    options: {
+      min: 5,
+      max: 45
+    },
+    errorMessage: "El email debe contener entre 5 y 45 caracteres"
   } 
 },
 provincia: {
@@ -41,12 +49,22 @@ nombre: {
     bail: true
   },
   isString: {
-    errorMessage: 'Tipo de dato inválido. Debe ser string.'
+    errorMessage: 'Tipo de dato inválido. Debe ser string.',
+    bail: true
   },
   matches: {
-    options: /^[a-zA-Z\s.]*$/,
-    errorMessage: 'El nombre solo puede contener letras, espacios y puntos'
-  }
+    options: /^[a-zA-Z0-9]+$/,
+    errorMessage: 'El nombre solo puede contener letras y números. Sin espacios ni caracteres especiales.',
+    bail: true
+  },
+  isLength: {
+    options: {
+      min: 2,
+      max: 50
+    },
+    errorMessage: "El nombre debe tener entre 2 y 50 caracteres",
+    bail: true
+  } 
   }
 }
 
