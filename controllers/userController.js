@@ -1,6 +1,22 @@
 // llamar a la conexión 
 const sql = require('../connection.js')
+const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt')
+require('dotenv').config()
 
+
+//Generar token
+const generateToken = (user) => {
+  return jwt.sign(user, process.env.SECRET, {expiresIn: "30m"})
+}
+
+//Validar token
+const validateToken = (req, res, next) => {
+  const accessToken = req.headers['authorization']
+  if(!accessToken) {
+    // enviar 401 
+  }
+}
 
 const userController = {
   'login': async function (req, res) {
@@ -8,19 +24,19 @@ const userController = {
     const password = req.body.password
     const send = {}
     const data = await sql `SELECT * FROM usuarios WHERE usuario = ${usuario}`
-    
+
     if(data.length === 0){
       send.errors = [{status: "409", title: "Conflict", message: 'El usuario no existe' }]
       res.send(send)
     } else {
-      // Si el usuario existe, comparo password (incorporar módulo para hash)
       const user = data[0]
-      user.pass === password 
+
+      bcrypt.compareSync(password, user.pass)
       ?
       send.data = [{status: "200", title: "Transaction OK", message: 'Sesión iniciada' }]
       : 
       send.errors = [{status: "409", title: "Conflict", message: 'Contraseña incorrecta' }]
-      console.log(user)
+    
       res.send(send)
     }
     
