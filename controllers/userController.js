@@ -3,8 +3,28 @@ const sql = require('../connection.js')
 
 
 const userController = {
-  'login': function (req, res) {
-
+  'login': async function (req, res) {
+    const usuario = req.body.usuario
+    const password = req.body.password
+    const send = {}
+    const data = await sql `SELECT * FROM usuarios WHERE usuario = ${usuario}`
+    
+    if(data.length === 0){
+      send.errors = [{status: "409", title: "Conflict", message: 'El usuario no existe' }]
+      res.send(send)
+    } else {
+      // Si el usuario existe, comparo password (incorporar módulo para hash)
+      const user = data[0]
+      user.pass === password 
+      ?
+      send.data = [{status: "200", title: "Transaction OK", message: 'Sesión iniciada' }]
+      : 
+      send.errors = [{status: "409", title: "Conflict", message: 'Contraseña incorrecta' }]
+      console.log(user)
+      res.send(send)
+    }
+    
+    
   },
   'createUser': async function (req, res) {
 
