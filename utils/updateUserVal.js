@@ -1,28 +1,17 @@
-const checkPass = (pass2, { req }) => {
-  const {password} = req.body
-  if (!password) {
-    return true
-  }
-  if(!pass2 && password){
-    throw new Error('Debe repetir el password')
-  } 
-  if(pass2 !== password){
-    throw new Error('Las contraseñas no coinciden')
-  } 
-  return true
+const checkPass = (nuevoPassword, { req }) => {
+  const {repetirPassword} = req.body.password
+  return nuevoPassword === repetirPassword
+  
 }
 
 const checkBody = (val, {req}) =>{
   const body = req.body
   const bodyLength = Object.entries(body).length
+  const values = Object.entries(body).some(el => el[1])
 
-  if(bodyLength === 0){
+  if(bodyLength === 0 || !values){
     throw new Error()
-  } 
-  const entries = Object.entries(body).some(el => el[1])
-  if(!entries){
-    throw new Error()
-  } 
+  }  
   return true
 }
 
@@ -52,6 +41,48 @@ const validations = {
   }, 
   nombreUsuario: {
 
+  },
+  password: {
+    isObject: {
+      errorMessage: "Campo inválido. Debe enviar un objeto",
+      bail: true
+    }
+  },
+  "password.nuevoPassword": {
+    exists: {
+      errorMessage: "Error de estructura: password debe contener nuevoPassword",
+      bail: true
+    },
+    notEmpty:{
+      errorMessage: "Campo obligatorio",
+      bail: true
+    },
+    isStrongPassword: {
+      options: {
+        minLength: 5,
+        maxLength: 24,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1,
+        minSymbols: 1
+      },
+      errorMessage: "La contraseña debe contener entre 5 y 24 caracteres, al menos una minúscula, una mayúscula, un número y un caracter especial"
+    },
+    custom: {
+      options : checkPass,
+      errorMessage: "Las contraseñas no coinciden",
+      bail: true
+    }
+  },
+  "password.repetirPassword": {
+    exists: {
+      errorMessage: "Error de estructura: password debe contener repetirPassword",
+      bail: true
+    },
+    notEmpty:{
+      errorMessage: "Campo obligatorio",
+      bail: true
+    }
   },
   custom: {
     custom: {
