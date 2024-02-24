@@ -11,6 +11,19 @@ const checkPass = (pass2, { req }) => {
   return true
 }
 
+const checkBody = (val, {req}) =>{
+  const body = req.body
+  const props = Object.entries(body).length
+
+  if(props === 0){
+    throw new Error ('Debe especificar al menos un campo')
+  } 
+  if(Object.hasOwn(body, "passwordRepetido") && props === 1){
+    throw new Error('Debe especificar al menos un campo')
+  }
+  return true
+}
+
 
 const validations = {
   usuario: {
@@ -58,6 +71,11 @@ const validations = {
   passwordRepetido:{
     custom: {
       options: checkPass
+    }
+  },
+  custom: {
+    custom: {
+      options: checkBody
     }
   }
 }

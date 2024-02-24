@@ -48,9 +48,22 @@ router.post('/setFav/', checkSchema(favsValidations), function (req, res) {
 router.put('/updateUser', checkSchema(updateUserValidations), function(req,res){
 
 const data = validationResult(req)
-res.send(data)
-// updateUser(req, res)
+if(data.errors.some(el => el.location === 'body')){
+  return res.status(400).json({
+    errors: [
+      {
+        status: '400',
+        title: 'Bad Request',
+        detail: 'Debe especificar al menos un campo entre los siguientes: usuario, provincia, nombreUsuario, password'
+      }
+    ]
+  });
+} else {
+  res.send(data)
+}
 })
+
+// updateUser(req, res)
 
 
 router.delete('/deleteUser', checkSchema(delUserValidations), function (req, res) {
@@ -64,3 +77,4 @@ router.delete('/deleteUser', checkSchema(delUserValidations), function (req, res
   }
 })
 module.exports = router;
+
