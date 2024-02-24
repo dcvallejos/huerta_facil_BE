@@ -41,7 +41,11 @@ nombre: {
     bail: true
   },
   isString: {
-    errorMessage: 'Indique bien su nombre'
+    errorMessage: 'Tipo de dato inválido. Debe ser string.'
+  },
+  matches: {
+    options: /^[a-zA-Z\s.]*$/,
+    errorMessage: 'El nombre solo puede contener letras, espacios y puntos'
   }
   }
 }
