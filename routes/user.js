@@ -1,13 +1,23 @@
 const express = require('express');
 const router = express.Router();
-const { login, createUser, getFavs, setFav, updateUser, deleteUser, getProvincias } = require('../controllers/userController')
 const validations = require('../utils/registerVal.js')
 const idValidations = require('../utils/plantVal.js')
 const favsValidations = require('../utils/favsVal.js')
+const loginValidations = require('../utils/loginVal.js')
 const delUserValidations = require('../utils/deleteUserVal.js')
-const { body, checkSchema, validationResult } = require('express-validator')
+const { checkSchema, validationResult } = require('express-validator')
+const { login, createUser, getFavs, setFav, updateUser, deleteUser, getProvincias } = require('../controllers/userController')
 
-router.post('/login', login)
+router.post('/login', checkSchema(loginValidations), function(req,res) {
+  const invalid = validationResult(req)
+  if (!invalid.isEmpty()) {
+    res.send(invalid)
+  }
+  else {
+    login(req, res)
+  }
+})
+
 router.post('/createUser', checkSchema(validations), function (req, res) {
   const invalid = validationResult(req)
   if (!invalid.isEmpty()) {
