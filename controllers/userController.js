@@ -159,6 +159,12 @@ const userController = {
         res.send(send)
       }
     }
+  },
+  'getProvincias': async function(req, res){
+    const data = await sql`SELECT * FROM getProvincias()`
+    res.send({
+      data
+    })
   }
 }
 
