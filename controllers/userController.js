@@ -116,14 +116,15 @@ const userController = {
       }
     }
   },
-  'updateUser': function (req, res) {
+  'updateUser': async function (req, res) {
+    // Hasta adaptar express session, enviar siempre un usuario para buscar el id del usuario, dejo el usuario en null dentro del SP por si acaso
     const usuario = req.body.usuario || null
     const provincia = req.body.provincia || null
-    const password = req.body.password || null
+    const password = req.body.password.nuevoPassword || null
     const nombreUsuario = req.body.nombreUsuario || null
-
+    
     console.log(usuario, provincia, password, nombreUsuario)
-    res.send('fin')
+    res.send(userId)
   },
 
   /*  Elimina un usuario pasado dentro del elemento del body "id_usuario" y activa un trigger 

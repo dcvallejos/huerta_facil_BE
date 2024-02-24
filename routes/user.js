@@ -59,7 +59,7 @@ if(data.errors.some(el => el.path === 'custom')){
     ]
   });
 } else {
-  res.send(data)
+  updateUser(req, res)
 }
 })
 

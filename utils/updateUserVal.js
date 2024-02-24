@@ -82,6 +82,11 @@ const validations = {
     }
 },
   "password.nuevoPassword": {
+    optional: {
+      options: {
+        values: 'falsy'
+      }
+    },
     isStrongPassword: {
       options: {
         minLength: 5,
