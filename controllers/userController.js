@@ -11,7 +11,9 @@ const userController = {
     const usuario = req.body.usuario
     const password = req.body.password
     const send = {}
-    const data = await sql `SELECT * FROM usuarios WHERE usuario = ${usuario}`
+
+    try {
+      const data = await sql `SELECT * FROM usuarios WHERE usuario = ${usuario}`
 
     if(data.length === 0){
       send.errors = [{status: "409", title: "Conflict", message: 'El usuario no existe' }]
@@ -29,7 +31,15 @@ const userController = {
       }
       res.send(send)
     }
-    
+    } catch {
+      res.send({errors: [
+        {
+          "status": 500,
+          "title": "Internal error",
+          "message": "Error del servidor, contáctese con el administrador"
+        }]
+      })
+    }
     
   },
   'createUser': async function (req, res) {
@@ -39,8 +49,8 @@ const userController = {
       provincia = req.body.provincia,
       password = req.body.password,
       nombre = req.body.nombre;
-
-    const test = await sql`SELECT checkUserName(${email})`
+try {
+  const test = await sql`SELECT checkUserName(${email})`
     if (test.length >= 1) {
       console.log(test.length)
       send.errors = []
@@ -57,6 +67,16 @@ const userController = {
       send.data = {type: 'response', attributes: {status: "200", title: "Transaction OK", message: 'Usuario creado correctamente'}}
       res.send(send)
     }
+} catch {
+  res.send({errors: [
+    {
+      "status": 500,
+      "title": "Internal error",
+      "message": "Error del servidor, contáctese con el administrador"
+    }]
+  })
+}
+    
 
   },
   'getFavs': async function (req, res) {
@@ -197,7 +217,6 @@ const userController = {
         }]
       })
     }
-    
   }
 }
 
