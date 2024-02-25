@@ -37,6 +37,11 @@ router.post('/createUser', checkSchema(validations), function (req, res) {
 
 router.get('/getProvincias', getProvincias)
 
+
+// A partir de aqui todos los endpoints estan sujetos bajo validacion JWT
+
+router.use(validateToken)
+
 router.get('/getFavs/:id', idValidations, function (req, res) {
   const invalid = validationResult(req)
   console.log(invalid)
@@ -47,21 +52,7 @@ router.get('/getFavs/:id', idValidations, function (req, res) {
   }
 })
 
-router.post('/setFav/', validateToken, checkSchema(favsValidations), function (req, res) {
-  const invalid = validationResult(req)
-  if (!invalid.isEmpty()) {
-    const send = {
-      "errors": invalid
-    }
-    res.send(send)
-  }
-  else {
-    setFav(req, res)
-  }
-})
-
 router.put('/updateUser', updateUser)
-
 
 router.delete('/deleteUser', checkSchema(delUserValidations), function (req, res) {
   const invalid = validationResult(req)
@@ -71,6 +62,19 @@ router.delete('/deleteUser', checkSchema(delUserValidations), function (req, res
   }
   else {
     deleteUser(req, res)
+  }
+})
+
+router.post('/setFav/', checkSchema(favsValidations), function (req, res) {
+  const invalid = validationResult(req)
+  if (!invalid.isEmpty()) {
+    const send = {
+      "errors": invalid
+    }
+    res.send(send)
+  }
+  else {
+    setFav(req, res)
   }
 })
 module.exports = router;
