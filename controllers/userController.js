@@ -185,10 +185,19 @@ const userController = {
     }
   },
   'getProvincias': async function(req, res){
+    try {
     const data = await sql`SELECT * FROM getProvincias()`
-    res.send({
-      data
-    })
+    res.send({data})
+    } catch {
+      res.send({errors: [
+        {
+          "status": 500,
+          "title": "Internal error",
+          "message": "Error del servidor, contáctese con el administrador"
+        }]
+      })
+    }
+    
   }
 }
 
