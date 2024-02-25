@@ -43,7 +43,6 @@ const userController = {
   },
   'createUser': async function (req, res) {
 
-    const send = {}
     const email = req.body.email,
       provincia = req.body.provincia,
       password = req.body.password,
@@ -51,19 +50,14 @@ const userController = {
 try {
   const test = await sql`SELECT checkUserName(${email})`
     if (test.length >= 1) {
-      send.errors = []
-      const err = {
+      res.send({errors: [{
         "status": 409,
         "title": "Conflict",
         "message": "Email en uso. Utilice otro"
-      }
-      send.errors.push(err)
-      res.send(send)
+      }]})
     } else {
-      console.log(test.length)
       await sql`SELECT createUser(${email}, ${provincia}, ${password}, ${nombre})`
-      send.data = {type: 'response', attributes: {status: "200", title: "Transaction OK", message: 'Usuario creado correctamente'}}
-      res.send(send)
+      res.send({type: 'response', attributes: {status: "200", title: "Transaction OK", message: 'Datos modificados correctamente'}})
     }
 } catch {
   res.status(500).send({errors: [
@@ -165,16 +159,28 @@ try {
     const email = req.body.email|| null
     const provincia = req.body.provincia || null
     const nombreUsuario = req.body.nombreUsuario || null
-    
-
-    
-    console.log()
+  
     try {
-     // const data = await sql`SELECT updateUser(${userData.id_usuario}, ${email}, ${provincia}, NULL , ${nombreUsuario})`
+      const test = await sql`SELECT checkUserName(${email})`
+        if (test.length >= 1) {
+          res.send({errors: [{
+            "status": 409,
+            "title": "Conflict",
+            "message": "Email en uso. Utilice otro"
+          }]})
+        } else {
+          await sql`SELECT updateUser(${userData.id_usuario}, ${email}, ${provincia}, NULL , ${nombreUsuario})`
+          res.send({type: 'response', attributes: {status: "200", title: "Transaction OK", message: 'Datos modificados correctamente'}})
+        }
     } catch {
-      // 500 handler
+      res.status(500).send({errors: [
+        {
+          "status": 500,
+          "title": "Internal error",
+          "message": "Error del servidor, contáctese con el administrador"
+        }]
+      })
     }
-   res.send('fin')
   },
 
   /*  Elimina un usuario pasado dentro del elemento del body "id_usuario" y activa un trigger 
