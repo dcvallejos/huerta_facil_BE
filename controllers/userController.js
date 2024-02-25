@@ -2,9 +2,8 @@
 const sql = require('../connection.js')
 const bcrypt = require('bcrypt')
 const { generateToken } = require('../utils/token')
-
-
-
+const jwt = require('jsonwebtoken')
+require('dotenv').config()
 
 const userController = {
   'login': async function (req, res) {
@@ -42,7 +41,6 @@ const userController = {
 
     const test = await sql`SELECT checkUserName(${email})`
     if (test.length >= 1) {
-      console.log(test.length)
       send.errors = []
       const err = {
         "status": 409,
@@ -141,14 +139,22 @@ const userController = {
     }
   },
   'updateUser': async function (req, res) {
-    // Hasta adaptar express session, enviar siempre un usuario para buscar el id del usuario, dejo el usuario en null dentro del SP por si acaso
-    const usuario = req.body.usuario || null
+    const cookieToken = req.cookies.jwt
+    const userData = jwt.verify(cookieToken, process.env.SECRET)
+
+    const email = req.body.email|| null
     const provincia = req.body.provincia || null
-    const password = req.body.password.nuevoPassword || null
     const nombreUsuario = req.body.nombreUsuario || null
     
-    console.log(usuario, provincia, password, nombreUsuario)
-    res.send(userId)
+
+    
+    console.log()
+    try {
+     // const data = await sql`SELECT updateUser(${userData.id_usuario}, ${email}, ${provincia}, NULL , ${nombreUsuario})`
+    } catch {
+      // 500 handler
+    }
+   res.send('fin')
   },
 
   /*  Elimina un usuario pasado dentro del elemento del body "id_usuario" y activa un trigger 

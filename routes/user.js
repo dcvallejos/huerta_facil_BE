@@ -5,6 +5,7 @@ const idValidations = require('../utils/plantVal.js')
 const favsValidations = require('../utils/favsVal.js')
 const loginValidations = require('../utils/loginVal.js')
 const delUserValidations = require('../utils/deleteUserVal.js')
+const updateUserValidations = require('../utils/updateUserVal.js')
 const { checkSchema, validationResult } = require('express-validator')
 const { login, createUser, getFavs, setFav, updateUser, deleteUser, getProvincias } = require('../controllers/userController')
 const cookieParser = require('cookie-parser')
@@ -52,8 +53,6 @@ router.get('/getFavs/:id', idValidations, function (req, res) {
   }
 })
 
-router.put('/updateUser', updateUser)
-
 router.delete('/deleteUser', checkSchema(delUserValidations), function (req, res) {
   const invalid = validationResult(req)
   console.log(invalid)
@@ -95,9 +94,6 @@ if(data.errors.some(el => el.path === 'custom')){
   updateUser(req, res)
 }
 })
-
-// updateUser(req, res)
-
 
 router.delete('/deleteUser', checkSchema(delUserValidations), function (req, res) {
   const invalid = validationResult(req)
