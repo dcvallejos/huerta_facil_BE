@@ -1,3 +1,5 @@
+const { checkBody } = require('./customs.js')
+
 const validations = {
 email: {
   notEmpty: {
@@ -64,7 +66,12 @@ nombre: {
     },
     errorMessage: "El nombre debe tener entre 2 y 50 caracteres",
     bail: true
-  } 
+  }},
+  body: {
+    custom: {
+      options: checkBody,
+      bail: true
+    }
   }
 }
 
