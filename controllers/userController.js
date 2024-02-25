@@ -22,6 +22,7 @@ const userController = {
       if(bcrypt.compareSync(password, user.pass)){
         const token = generateToken(user)
         send.data = {type: 'response', attributes: {status: "200", title: "Transaction OK", message: 'Sesión iniciada', token: token}}
+        res.cookie('jwt', token)
       }
       else { 
         send.errors = [{status: "409", title: "Conflict", message: 'Contraseña incorrecta' }]
