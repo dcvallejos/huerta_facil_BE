@@ -32,7 +32,7 @@ const userController = {
       res.send(send)
     }
     } catch {
-      res.send({errors: [
+      res.status(500).send({errors: [
         {
           "status": 500,
           "title": "Internal error",
@@ -68,7 +68,7 @@ try {
       res.send(send)
     }
 } catch {
-  res.send({errors: [
+  res.status(500).send({errors: [
     {
       "status": 500,
       "title": "Internal error",
@@ -200,7 +200,7 @@ try {
           "message": "Error del servidor, contáctese con el administrador"
         }
         send.errors.push(err)
-        res.send(send)
+        res.status(500).send(send)
       }
     }
   },
@@ -209,7 +209,7 @@ try {
     const data = await sql`SELECT * FROM getProvincias()`
     res.send({data})
     } catch {
-      res.send({errors: [
+      res.status(500).send({errors: [
         {
           "status": 500,
           "title": "Internal error",
