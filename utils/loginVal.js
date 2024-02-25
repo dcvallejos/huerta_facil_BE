@@ -1,3 +1,5 @@
+const { checkBody } = require('./customs.js')
+
 const validations = {
   usuario: {
     notEmpty: {
@@ -11,6 +13,12 @@ const validations = {
   password: {
     notEmpty: {
       errorMessage: "campo obligatorio"
+    }
+  },
+  body: {
+    custom: {
+      options:  (val, {req}) => checkBody(req, 2),
+      bail: true
     }
   }
 }
