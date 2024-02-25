@@ -7,6 +7,10 @@ const loginValidations = require('../utils/loginVal.js')
 const delUserValidations = require('../utils/deleteUserVal.js')
 const { checkSchema, validationResult } = require('express-validator')
 const { login, createUser, getFavs, setFav, updateUser, deleteUser, getProvincias } = require('../controllers/userController')
+const cookieParser = require('cookie-parser')
+const { validateToken } = require('../utils/token')
+
+router.use(cookieParser())
 
 router.post('/login', checkSchema(loginValidations), function(req,res) {
   const invalid = validationResult(req)
@@ -43,7 +47,7 @@ router.get('/getFavs/:id', idValidations, function (req, res) {
   }
 })
 
-router.post('/setFav/', checkSchema(favsValidations), function (req, res) {
+router.post('/setFav/', validateToken, checkSchema(favsValidations), function (req, res) {
   const invalid = validationResult(req)
   if (!invalid.isEmpty()) {
     const send = {
