@@ -7,6 +7,10 @@ const loginValidations = require('../utils/loginVal.js')
 const delUserValidations = require('../utils/deleteUserVal.js')
 const { checkSchema, validationResult } = require('express-validator')
 const { login, createUser, getFavs, setFav, updateUser, deleteUser, getProvincias } = require('../controllers/userController')
+const cookieParser = require('cookie-parser')
+const { validateToken } = require('../utils/token')
+
+router.use(cookieParser())
 
 router.post('/login', checkSchema(loginValidations), function(req,res) {
   const invalid = validationResult(req)
@@ -33,6 +37,11 @@ router.post('/createUser', checkSchema(validations), function (req, res) {
 
 router.get('/getProvincias', getProvincias)
 
+
+// A partir de aqui todos los endpoints estan sujetos bajo validacion JWT
+
+router.use(validateToken)
+
 router.get('/getFavs/:id', idValidations, function (req, res) {
   const invalid = validationResult(req)
   console.log(invalid)
@@ -40,6 +49,19 @@ router.get('/getFavs/:id', idValidations, function (req, res) {
     res.send(invalid)
   } else {
     getFavs(req, res)
+  }
+})
+
+router.put('/updateUser', updateUser)
+
+router.delete('/deleteUser', checkSchema(delUserValidations), function (req, res) {
+  const invalid = validationResult(req)
+  console.log(invalid)
+  if (!invalid.isEmpty()) {
+    res.send(invalid)
+  }
+  else {
+    deleteUser(req, res)
   }
 })
 
@@ -53,20 +75,6 @@ router.post('/setFav/', checkSchema(favsValidations), function (req, res) {
   }
   else {
     setFav(req, res)
-  }
-})
-
-router.put('/updateUser', updateUser)
-
-
-router.delete('/deleteUser', checkSchema(delUserValidations), function (req, res) {
-  const invalid = validationResult(req)
-  console.log(invalid)
-  if (!invalid.isEmpty()) {
-    res.send(invalid)
-  }
-  else {
-    deleteUser(req, res)
   }
 })
 module.exports = router;
