@@ -15,6 +15,14 @@ router.use(cookieParser())
 router.post('/login', checkSchema(loginValidations), function(req,res) {
   const invalid = validationResult(req)
   if (!invalid.isEmpty()) {
+    invalid.errors.some(el => el.path === 'body') ?
+    res.status(400).send({ errors: [{
+        "status": 400,
+        "title": "Bad Request",
+        "message": "Solicitud incorrecta, el request body debe contener email y password"
+      }]
+    })
+    :
     res.send(invalid)
   }
   else {

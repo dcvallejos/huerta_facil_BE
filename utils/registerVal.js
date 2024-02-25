@@ -69,7 +69,7 @@ nombre: {
   }},
   body: {
     custom: {
-      options: checkBody,
+      options: (val, {req}) => checkBody(req, 4),
       bail: true
     }
   }

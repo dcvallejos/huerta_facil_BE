@@ -1,8 +1,8 @@
 const customs = {
-  "checkBody": (val, {req, res}) =>{
+  "checkBody": (req, min) =>{
     const body = req.body
     const bodyLength = Object.entries(body).length
-    if(bodyLength < 4){
+    if(bodyLength < min){
       throw new Error()
     }  
     return true
