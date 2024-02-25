@@ -15,6 +15,14 @@ router.use(cookieParser())
 router.post('/login', checkSchema(loginValidations), function(req,res) {
   const invalid = validationResult(req)
   if (!invalid.isEmpty()) {
+    invalid.errors.some(el => el.path === 'body') ?
+    res.status(400).send({ errors: [{
+        "status": 400,
+        "title": "Bad Request",
+        "message": "Solicitud incorrecta, el request body debe contener email y password"
+      }]
+    })
+    :
     res.send(invalid)
   }
   else {
@@ -24,15 +32,18 @@ router.post('/login', checkSchema(loginValidations), function(req,res) {
 
 router.post('/createUser', checkSchema(validations), function (req, res) {
   const invalid = validationResult(req)
-  if (!invalid.isEmpty()) {
-    const send = {
-      "errors": invalid
-    }
-    res.send(send)
+  if(!invalid.isEmpty()){
+    invalid.errors.some(el => el.path === 'body') ?
+    res.status(400).send({ errors: [{
+        "status": 400,
+        "title": "Bad Request",
+        "message": "Solicitud incorrecta, el request body debe contener email, password, nombre y provincia"
+      }]
+    })
+    :
+    res.send(invalid)
   }
-  else {
-    createUser(req, res)
-  }
+  createUser(req, res)
 })
 
 router.get('/getProvincias', getProvincias)
