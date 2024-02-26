@@ -7,7 +7,7 @@ const loginValidations = require('../utils/loginVal.js')
 const delUserValidations = require('../utils/deleteUserVal.js')
 const updateUserValidations = require('../utils/updateUserVal.js')
 const { checkSchema, validationResult } = require('express-validator')
-const { login, createUser, getFavs, setFav, updateUser, deleteUser, getProvincias } = require('../controllers/userController')
+const { login, createUser, getFavs, setFav, updateUser, deleteUser, getProvincias, setPassword } = require('../controllers/userController')
 const cookieParser = require('cookie-parser')
 const { validateToken } = require('../utils/token')
 
@@ -104,6 +104,10 @@ router.put('/updateUser', checkSchema(updateUserValidations), function(req,res){
     else res.send(invalid)
   }
   updateUser(req, res)
+})
+
+router.put('/setPassword', function(req, res){
+setPassword(req, res)
 })
 
 router.delete('/deleteUser', checkSchema(delUserValidations), function (req, res) {
