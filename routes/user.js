@@ -6,6 +6,7 @@ const favsValidations = require('../utils/favsVal.js')
 const loginValidations = require('../utils/loginVal.js')
 const delUserValidations = require('../utils/deleteUserVal.js')
 const updateUserValidations = require('../utils/updateUserVal.js')
+const setPasswordValidations = require('../utils/setPasswordVal.js')
 const { checkSchema, validationResult } = require('express-validator')
 const { login, createUser, getFavs, setFav, updateUser, deleteUser, getProvincias, setPassword } = require('../controllers/userController')
 const cookieParser = require('cookie-parser')
@@ -106,7 +107,20 @@ router.put('/updateUser', checkSchema(updateUserValidations), function(req,res){
   updateUser(req, res)
 })
 
-router.put('/setPassword', function(req, res){
+router.put('/setPassword', checkSchema(setPasswordValidations), function(req, res){
+  const invalid = validationResult(req)
+  
+  if(!invalid.isEmpty()){
+    if(invalid.errors.some(el => el.path === 'body')){
+      res.status(400).send({ errors: [{
+          "status": 400,
+          "title": "Bad Request",
+          "message": "Solicitud incorrecta, el request body debe contener contraseña actual, nueva contraseña y nueva contraseña repetida" 
+        }]
+      })
+    }
+    else res.send(invalid)
+  }
 setPassword(req, res)
 })
 
