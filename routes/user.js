@@ -11,6 +11,7 @@ const { checkSchema, validationResult } = require('express-validator')
 const { login, createUser, getFavs, setFav, updateUser, deleteUser, getProvincias, setPassword } = require('../controllers/userController')
 const cookieParser = require('cookie-parser')
 const { validateToken } = require('../utils/token')
+const { isLoggedIn } = require('../utils/token')
 
 router.use(cookieParser())
 
@@ -32,7 +33,7 @@ router.post('/login', checkSchema(loginValidations), function(req,res) {
   }
 })
 
-router.post('/createUser', checkSchema(validations), function (req, res) {
+router.post('/createUser', isLoggedIn, checkSchema(validations), function (req, res) {
   const invalid = validationResult(req)
   if(!invalid.isEmpty()){
     invalid.errors.some(el => el.path === 'body') ?
@@ -45,7 +46,7 @@ router.post('/createUser', checkSchema(validations), function (req, res) {
     :
     res.send(invalid)
   }
-  createUser(req, res)
+  else createUser(req, res)
 })
 
 router.get('/getProvincias', getProvincias)

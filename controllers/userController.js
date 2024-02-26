@@ -50,7 +50,7 @@ const userController = {
 try {
   const test = await sql`SELECT checkUserName(${email})`
     if (test.length >= 1) {
-      res.send({errors: [{
+      return res.send({errors: [{
         "status": 409,
         "title": "Conflict",
         "message": "Email en uso. Utilice otro"
@@ -58,10 +58,10 @@ try {
     } else {
       const hashPass = bcrypt.hashSync(password, 12)
       await sql`SELECT createUser(${email}, ${provincia}, ${hashPass}, ${nombre})`
-      res.send({type: 'response', attributes: {status: "200", title: "Transaction OK", message: 'Datos modificados correctamente'}})
+      return res.send({type: 'response', attributes: {status: "200", title: "Transaction OK", message: 'Datos modificados correctamente'}})
     }
 } catch {
-  res.status(500).send({errors: [
+  return res.status(500).send({errors: [
     {
       "status": 500,
       "title": "Internal error",
@@ -78,31 +78,40 @@ try {
     const test = await sql`SELECT checkUserById(${userId})`
     const data = await sql`SELECT * FROM getFavs(${userId})`
 
+      if (test.length === 0) {
+        send.errors = []
+        const err = {
+          "status": 404,
+          "title": "Not Found",
+          "message": "El usuario no existe"
+        }
+        send.errors.push(err)
+        return res.send(send)
+      }
+      else if (data.length === 0) {
+        send.errors = []
+        const err = {
+          "status": 404,
+          "title": "Not Found",
+          "message": "El usuario no tiene favoritos"
+        }
+        send.errors.push(err)
+        return res.send(send)
+      }
+      else {
+        try {
+        send.data = data
+        return res.send(send)
 
-    if (test.length === 0) {
-      send.errors = []
-      const err = {
-        "status": 404,
-        "title": "Not Found",
-        "message": "El usuario no existe"
-      }
-      send.errors.push(err)
-      res.send(send)
+    } catch (error) {
+      return res.status(500).send({errors: [
+        {
+          "status": 500,
+          "title": "Internal error",
+          "message": "Error del servidor, contáctese con el administrador"
+        }]})
     }
-    else if (data.length === 0) {
-      send.errors = []
-      const err = {
-        "status": 404,
-        "title": "Not Found",
-        "message": "El usuario no tiene favoritos"
-      }
-      send.errors.push(err)
-      res.send(send)
-    }
-    else {
-      send.data = data
-      res.send(send)
-    }
+  }   
   },
   'setFav': async function (req, res) {
     const send = {}
@@ -119,7 +128,7 @@ try {
         "message": "El usuario no existe"
       }
       send.errors.push(err)
-      res.send(send)
+      return res.send(send)
     }
     else if (plantTest.length === 0) {
       send.errors = []
@@ -129,7 +138,7 @@ try {
         "message": "La planta ingresada no existe"
       }
       send.errors.push(err)
-      res.send(send)
+      return res.send(send)
     }
     else {
       try {
@@ -139,7 +148,7 @@ try {
           "title": "Transaction OK",
           "message": 'Favorito agregado'
         }
-        res.send(send)
+        return res.send(send)
       }
       catch {
         send.errors = []
@@ -149,7 +158,7 @@ try {
           "message": "La planta ya esta agregada en el listado de favoritos del usuario"
         }
         send.errors.push(err)
-        res.send(send)
+        return res.send(send)
       }
     }
   },
@@ -214,7 +223,7 @@ try {
           "title": "Transaction OK",
           "message": 'Usuario correctamente eliminado'
         }
-        res.send(send)
+        return res.send(send)
       }
       catch {
         send.errors = []
@@ -224,16 +233,16 @@ try {
           "message": "Error del servidor, contáctese con el administrador"
         }
         send.errors.push(err)
-        res.status(500).send(send)
+        return res.status(500).send(send)
       }
     }
   },
   'getProvincias': async function(req, res){
     try {
     const data = await sql`SELECT * FROM getProvincias()`
-    res.send({data})
+    return res.send({data})
     } catch {
-      res.status(500).send({errors: [
+      return res.status(500).send({errors: [
         {
           "status": 500,
           "title": "Internal error",
