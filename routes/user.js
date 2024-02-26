@@ -5,6 +5,7 @@ const idValidations = require('../utils/plantVal.js')
 const favsValidations = require('../utils/favsVal.js')
 const loginValidations = require('../utils/loginVal.js')
 const delUserValidations = require('../utils/deleteUserVal.js')
+const updateUserValidations = require('../utils/updateUserVal.js')
 const { checkSchema, validationResult } = require('express-validator')
 const { login, createUser, getFavs, setFav, updateUser, deleteUser, getProvincias } = require('../controllers/userController')
 const cookieParser = require('cookie-parser')
@@ -63,8 +64,6 @@ router.get('/getFavs/:id', idValidations, function (req, res) {
   }
 })
 
-router.put('/updateUser', updateUser)
-
 router.delete('/deleteUser', checkSchema(delUserValidations), function (req, res) {
   const invalid = validationResult(req)
   console.log(invalid)
@@ -88,4 +87,34 @@ router.post('/setFav/', checkSchema(favsValidations), function (req, res) {
     setFav(req, res)
   }
 })
+
+router.put('/updateUser', checkSchema(updateUserValidations), function(req,res){
+  const invalid = validationResult(req)
+  
+  if(!invalid.isEmpty()){
+    if(invalid.errors.some(el => el.path === 'body')){
+      const errorMsg = invalid.errors.find(el => el.path === 'body')
+      res.status(400).send({ errors: [{
+          "status": 400,
+          "title": "Bad Request",
+          "message": errorMsg.msg === 'Invalid value'? "Solicitud incorrecta, el request body debe contener email, nombre y provincia" : errorMsg.msg
+        }]
+      })
+    }
+    else res.send(invalid)
+  }
+  updateUser(req, res)
+})
+
+router.delete('/deleteUser', checkSchema(delUserValidations), function (req, res) {
+  const invalid = validationResult(req)
+  console.log(invalid)
+  if (!invalid.isEmpty()) {
+    res.send(invalid)
+  }
+  else {
+    deleteUser(req, res)
+  }
+})
 module.exports = router;
+

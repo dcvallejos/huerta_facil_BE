@@ -6,6 +6,15 @@ const customs = {
       throw new Error()
     }  
     return true
+  },
+"checkMinimumParams":(req) =>{
+    const body = req.body
+    const values = Object.entries(body).some(el => el[1])
+  
+    if(!values){
+      throw new Error('Debe especificar al menos un valor')
+    }  
+    return true
   }
 }
 
