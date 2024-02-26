@@ -89,21 +89,21 @@ router.post('/setFav/', checkSchema(favsValidations), function (req, res) {
 })
 
 router.put('/updateUser', checkSchema(updateUserValidations), function(req,res){
-
-const data = validationResult(req)
-if(data.errors.some(el => el.path === 'custom')){
-  return res.status(400).json({
-    errors: [
-      {
-        status: '400',
-        title: 'Bad Request',
-        detail: 'Debe especificar al menos un campo entre los siguientes: usuario, provincia, nombreUsuario, password'
-      }
-    ]
-  });
-} else {
+  const invalid = validationResult(req)
+  
+  if(!invalid.isEmpty()){
+    if(invalid.errors.some(el => el.path === 'body')){
+      const errorMsg = invalid.errors.find(el => el.path === 'body')
+      res.status(400).send({ errors: [{
+          "status": 400,
+          "title": "Bad Request",
+          "message": errorMsg.msg === 'Invalid value'? "Solicitud incorrecta, el request body debe contener email, nombre y provincia" : errorMsg.msg
+        }]
+      })
+    }
+    else res.send(invalid)
+  }
   updateUser(req, res)
-}
 })
 
 router.delete('/deleteUser', checkSchema(delUserValidations), function (req, res) {

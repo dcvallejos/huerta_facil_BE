@@ -158,7 +158,7 @@ try {
 
     const email = req.body.email|| null
     const provincia = req.body.provincia || null
-    const nombreUsuario = req.body.nombreUsuario || null
+    const nombre = req.body.nombre || null
   
     try {
       const test = await sql`SELECT checkUserName(${email})`
@@ -169,10 +169,15 @@ try {
             "message": "Email en uso. Utilice otro"
           }]})
         } else {
-          await sql`SELECT updateUser(${userData.id_usuario}, ${email}, ${provincia}, NULL , ${nombreUsuario})`
+          await sql`SELECT updateUser(${userData.id_usuario}, ${email}, ${provincia}, NULL , ${nombre})`
+          // Cambiar por un SP o modificar sp updateUser para que devuelva los datos modificados
+          const user = await sql`SELECT * FROM usuarios WHERE id_usuario = ${userData.id_usuario}`
+          const token = generateToken(user[0])
+          res.cookie('jwt', token)
           res.send({type: 'response', attributes: {status: "200", title: "Transaction OK", message: 'Datos modificados correctamente'}})
         }
-    } catch {
+    } catch (err) {
+      console.log(err)
       res.status(500).send({errors: [
         {
           "status": 500,

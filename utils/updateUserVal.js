@@ -1,43 +1,7 @@
-const checkPass = (nuevoPassword, { req }) => {
-  const {repetirPassword} = req.body.password
-  if(nuevoPassword !== repetirPassword){
-    throw new Error('Las contraseñas no coinciden')
-  } else return true
-  
-}
-
-const checkBody = (val, {req}) =>{
-  const body = req.body
-  const bodyLength = Object.entries(body).length
-  const values = Object.entries(body).some(el => el[1])
-
-  if(bodyLength === 0 || !values){
-    throw new Error()
-  }  
-  return true
-}
-
-const checkPassObj = (nuevoPass, {req}) => {
-  const passwordObj = req.body.password
-  if(passwordObj){
-    if(!Object.hasOwn(passwordObj, "nuevoPassword") && !Object.hasOwn(passwordObj, "repetirPassword")){
-      throw new Error('Error de estructura: El objeto password debe contener nuevoPassword y repetirPassword')
-    }
-    if(!passwordObj.nuevoPassword || !passwordObj.repetirPassword){
-      throw new Error('Campos obligatorios')
-    }
-  }
-  return true
-}
-
-const checkAllPass =(val, {req}) => {
-  checkPassObj(val, {req})
-  checkPass(val, {req})
-  return true
-}
+const {checkBody, checkMinimumParams} = require('./customs.js')
 
 const validations = {
-  usuario: {
+  email: {
     optional: {
       options: {
         values: 'falsy'
@@ -59,55 +23,40 @@ const validations = {
         },
       errorMessage: 'Provincia inválida'  
   }, 
-  nombreUsuario: {
-    optional: {
-      options: {
-        values: 'falsy'
-      }
-  },
-  matches: {
-    options: /^[a-zA-Z\s.]*$/,
-    errorMessage: 'El nombre solo puede contener letras, espacios y puntos'
-  }
-},
-  password: {
+  nombre: {
     optional: {
       options: {
         values: 'falsy'
       }
     },
-      isObject: {
-      errorMessage: "Campo inválido. Debe enviar un objeto",
+    isString: {
+      errorMessage: 'Tipo de dato inválido. Debe ser string.',
       bail: true
-    }
-},
-  "password.nuevoPassword": {
-    optional: {
-      options: {
-        values: 'falsy'
-      }
     },
-    isStrongPassword: {
+    matches: {
+      options: /^[a-zA-Z0-9]+$/,
+      errorMessage: 'El nombre solo puede contener letras y números. Sin espacios ni caracteres especiales.',
+      bail: true
+    },
+    isLength: {
       options: {
-        minLength: 5,
-        maxLength: 24,
-        minLowercase: 1,
-        minUppercase: 1,
-        minNumbers: 1,
-        minSymbols: 1
+        min: 2,
+        max: 50
       },
-      errorMessage: "La contraseña debe contener entre 5 y 24 caracteres, al menos una minúscula, una mayúscula, un número y un caracter especial"
-    },
-    custom: {
-      options : checkAllPass,
+      errorMessage: "El nombre debe tener entre 2 y 50 caracteres",
       bail: true
+    }},
+    body: {
+      custom: {
+        options: (val, {req}) => {
+          if(!checkBody(req, 3) ){
+            return false
+          }
+          else return checkMinimumParams(req)
+        },
+        bail: true
+      }
     }
-  },
-  custom: {
-    custom: {
-      options: checkBody
-    }
-  }
 }
 
 module.exports = validations
