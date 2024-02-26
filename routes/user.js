@@ -15,7 +15,7 @@ const { isLoggedIn } = require('../utils/token')
 
 router.use(cookieParser())
 
-router.post('/login', checkSchema(loginValidations), function(req,res) {
+router.post('/login', isLoggedIn, checkSchema(loginValidations), function(req,res) {
   const invalid = validationResult(req)
   if (!invalid.isEmpty()) {
     invalid.errors.some(el => el.path === 'body') ?
