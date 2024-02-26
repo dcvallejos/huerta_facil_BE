@@ -56,7 +56,8 @@ try {
         "message": "Email en uso. Utilice otro"
       }]})
     } else {
-      await sql`SELECT createUser(${email}, ${provincia}, ${password}, ${nombre})`
+      const hashPass = bcrypt.hashSync(password, 12)
+      await sql`SELECT createUser(${email}, ${provincia}, ${hashPass}, ${nombre})`
       res.send({type: 'response', attributes: {status: "200", title: "Transaction OK", message: 'Datos modificados correctamente'}})
     }
 } catch {
