@@ -56,7 +56,8 @@ try {
         "message": "Email en uso. Utilice otro"
       }]})
     } else {
-      await sql`SELECT createUser(${email}, ${provincia}, ${password}, ${nombre})`
+      const hashPass = bcrypt.hashSync(password, 12)
+      await sql`SELECT createUser(${email}, ${provincia}, ${hashPass}, ${nombre})`
       res.send({type: 'response', attributes: {status: "200", title: "Transaction OK", message: 'Datos modificados correctamente'}})
     }
 } catch {
@@ -240,12 +241,39 @@ try {
         }]
       })
     }
+  },
+  'setPassword': async function(req, res){
+    const passwordActual = req.body.passwordActual
+    const nuevoPassword = req.body.nuevoPassword
+    const cookieToken = req.cookies.jwt
+    const userData = jwt.verify(cookieToken, process.env.SECRET)
+
+    try {
+      if(!bcrypt.compareSync(passwordActual, userData.pass)){
+        res.send({errors: [{
+          "status": 409,
+          "title": "Conflict",
+          "message": "Password incorrecto"
+        }]})
+      } else {
+          const hashPass = bcrypt.hashSync(nuevoPassword, 12)
+          await sql`SELECT updateUser(${userData.id_usuario}, NULL, NULL, ${hashPass} , NULL)`
+          // Cambiar por un SP o modificar sp updateUser para que devuelva los datos modificados
+          const user = await sql`SELECT * FROM usuarios WHERE id_usuario = ${userData.id_usuario}`
+          const token = generateToken(user[0])
+          res.cookie('jwt', token)
+          res.send({type: 'response', attributes: {status: "200", title: "Transaction OK", message: 'Contraseña modificada correctamente'}})
+        }
+    } catch (err) {
+      console.log(err)
+      res.status(500).send({errors: [
+        {
+          "status": 500,
+          "title": "Internal error",
+          "message": "Error del servidor, contáctese con el administrador"
+        }]
+      })
+    }
   }
 }
-
-
 module.exports = userController;
-
-
-/*updateUser(id_usuario_[int], usuario [string] (optional), provincia [string] (optional), password [string] (optional))
-En base a un id_usuario, se puede modificar opcionalmente cualquier registro del mismo (dejar NULL en los espacios que no se quiera modificar nada) */
