@@ -53,9 +53,13 @@ try {
     items_per_page: limit,
     current_page: page,
     total_pages: Math.ceil(totalPags.length / limit)
+    
   }
   if(startIndex > 0) paginado.previous_page = page -1
-  if(endIndex < totalPags.length - 1) paginado.next_page = page + 1
+  if(endIndex < totalPags.length - 1) {
+    paginado.next_page = page + 1;
+    paginado.next_url = `https://huertafacil-back-dev-szgg.2.us-1.fl0.io/plants/getCards?page=${page + 1}&limit=${limit}`
+  }
   
   res.send({pagination: paginado, data: data })
 } catch (err) {
