@@ -136,5 +136,6 @@ router.delete('/deleteUser', checkSchema(delUserValidations), function (req, res
     deleteUser(req, res)
   }
 })
+
 module.exports = router;
 
