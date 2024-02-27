@@ -37,10 +37,29 @@ if(data.length === 0){
 },
 'getCards': async function(req, res){
 // agregar lógica de paginado
+const page = parseInt(req.query.page) || null
+const limit = parseInt(req.query.limit) || 0
+
+const startIndex = (page - 1) * limit
+const endIndex = page * limit
+
+
+
 try {
-  const data = await sql`SELECT * FROM getCards()`
-  res.send(data)
-} catch {
+  const totalPags = await sql`SELECT * FROM getCards()` 
+  const data = await sql`SELECT * FROM getCards(offset_val => ${page}, limit_val => ${limit})`
+  const paginado = {
+    total: totalPags.length,
+    items_per_page: limit,
+    current_page: page,
+    total_pages: Math.ceil(totalPags.length / limit)
+  }
+  if(startIndex > 0) paginado.previous_page = page -1
+  if(endIndex < totalPags.length - 1) paginado.next_page = page + 1
+  
+  res.send({pagination: paginado, data: data })
+} catch (err) {
+  console.log(err)
   res.status(500).send({errors: [
     {
       "status": 500,
