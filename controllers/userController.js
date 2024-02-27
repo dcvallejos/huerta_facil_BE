@@ -73,6 +73,7 @@ const userController = {
 
   },
   'getFavs': async function (req, res) {
+    /*Retorna todas los nombres de las plantas favoritas del usuario logueado, precisa que el mismo este en sesion iniciada*/
     const send = {}
     var userId = req.params.id
     const test = await sql`SELECT checkUserById(${userId})`
@@ -203,9 +204,9 @@ const userController = {
     }
   },
 
+  'deleteUser': async function (req, res) {    
   /*  Elimina un usuario pasado dentro del elemento del body "id_usuario" y activa un trigger 
       que elimina previamente todos sus favoritos */
-  'deleteUser': async function (req, res) {
     const send = {}
     var id_usuario = req.body.id_usuario
     const userTest = await sql`SELECT checkUserById(${id_usuario})`

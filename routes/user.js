@@ -49,10 +49,10 @@ router.post('/createUser', isLoggedIn, checkSchema(validations), function (req, 
   else createUser(req, res)
 })
 
-
 router.get('/getProvincias', getProvincias)
 
 router.get('/logout', logout)
+
 
 // A partir de aqui todos los endpoints estan sujetos bajo validacion JWT
 
