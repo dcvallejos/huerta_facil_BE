@@ -19,8 +19,8 @@ const plantsController = {
       clima === "null" ? clima = null : decodeURIComponent(clima)
 
       console.log(clima)
-      const totalPags = await sql`SELECT * FROM getFiltered(provincia_param => ${provincia}, clima_param => ${clima}, tipo_planta_param =>${tipoPlanta})`
-      const data = await sql`SELECT * FROM getFiltered(offset_param => ${page}, limit_param => ${limit}, provincia_param => ${provincia}, clima_param => ${clima}, tipo_planta_param =>${tipoPlanta})`
+      const totalPags = await sql`SELECT * FROM filterBy(provincia_param => ${provincia}, clima_param => ${clima}, tipo_planta_param =>${tipoPlanta})`
+      const data = await sql`SELECT * FROM filterBy(offset_param => ${page}, limit_param => ${limit}, provincia_param => ${provincia}, clima_param => ${clima}, tipo_planta_param =>${tipoPlanta})`
       const paginado = {
         total: totalPags.length,
         items_per_page: limit,
@@ -31,12 +31,12 @@ const plantsController = {
 
       if (startIndex > 0){
         paginado.previous_page = page - 1
-        paginado.next_url = (`http://localhost:3000/plants/getFilters?page=${page - 1}&limit=${limit}&clima=${encodeURIComponent(clima)}&provincia=${encodeURIComponent(provincia)}&tipoPlanta=${encodeURIComponent(tipoPlanta)}`)
+        paginado.next_url = (`http://localhost:3000/plants/filterBy?page=${page - 1}&limit=${limit}&clima=${encodeURIComponent(clima)}&provincia=${encodeURIComponent(provincia)}&tipoPlanta=${encodeURIComponent(tipoPlanta)}`)
       }
         
       if (endIndex < totalPags.length - 1) {
         paginado.next_page = page + 1;
-        paginado.next_url = (`http://localhost:3000/plants/getFilters?page=${page + 1}&limit=${limit}&clima=${encodeURIComponent(clima)}&provincia=${encodeURIComponent(provincia)}&tipoPlanta=${encodeURIComponent(tipoPlanta)}`)
+        paginado.next_url = (`http://localhost:3000/plants/filterBy?page=${page + 1}&limit=${limit}&clima=${encodeURIComponent(clima)}&provincia=${encodeURIComponent(provincia)}&tipoPlanta=${encodeURIComponent(tipoPlanta)}`)
       }
       res.send({ pagination: paginado, data: data })
     } catch (err) {
