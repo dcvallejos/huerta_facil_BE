@@ -29,14 +29,7 @@ const userController = {
       return res.send(send)
     }
     catch {
-      res.status(500).send({
-        errors: [
-          {
-            "status": 500,
-            "title": "Internal error",
-            "message": "Error del servidor, contáctese con el administrador"
-          }]
-      })
+      res.status(500).send({ errors: [ { "status": 500,"title": "Internal error", "message": "Error del servidor, contáctese con el administrador" }]})
     }
   },
 
@@ -49,30 +42,16 @@ const userController = {
     try {
       const test = await sql`SELECT checkUserName(${email})`
       if (test.length >= 1) {
-        return res.send({
-          errors: [{
-            "status": 409,
-            "title": "Conflict",
-            "message": "Email en uso. Utilice otro"
-          }]
-        })
-      } else {
+        return res.send({ errors: [{  "status": 409, "title": "Conflict", "message": "Email en uso. Utilice otro" }] })
+      } 
+      else {
         const hashPass = bcrypt.hashSync(password, 12)
         await sql`SELECT createUser(${email}, ${provincia}, ${hashPass}, ${nombre})`
         return res.send({ type: 'response', attributes: { status: "200", title: "Transaction OK", message: 'Datos modificados correctamente' } })
       }
     } catch {
-      return res.status(500).send({
-        errors: [
-          {
-            "status": 500,
-            "title": "Internal error",
-            "message": "Error del servidor, contáctese con el administrador"
-          }]
-      })
+      return res.status(500).send({ errors: [ { "status": 500,"title": "Internal error","message": "Error del servidor, contáctese con el administrador" }] })
     }
-
-
   },
 
   'getFavs': async function (req, res) {
@@ -120,7 +99,7 @@ const userController = {
       }
     }
   },
-  
+
   'updateUser': async function (req, res) {
     const cookieToken = req.cookies.jwt
     const userData = jwt.verify(cookieToken, process.env.SECRET)
@@ -133,14 +112,11 @@ const userController = {
       const test = await sql`SELECT checkUserName(${email})`
       if (test.length >= 1) {
         res.send({
-          errors: [{
-            "status": 409,
-            "title": "Conflict",
-            "message": "Email en uso. Utilice otro"
-          }]
-        })
-      } else {
+          errors: [{ "status": 409, "title": "Conflict", "message": "Email en uso. Utilice otro" }]})
+      } 
+      else {
         await sql`SELECT updateUser(${userData.id_usuario}, ${email}, ${provincia}, NULL , ${nombre})`
+
         // Cambiar por un SP o modificar sp updateUser para que devuelva los datos modificados
         const user = await sql`SELECT * FROM usuarios WHERE id_usuario = ${userData.id_usuario}`
         const token = generateToken(user[0])
@@ -150,13 +126,7 @@ const userController = {
     } catch (err) {
       console.log(err)
       res.status(500).send({
-        errors: [
-          {
-            "status": 500,
-            "title": "Internal error",
-            "message": "Error del servidor, contáctese con el administrador"
-          }]
-      })
+        errors: [ {"status": 500,"title": "Internal error", "message": "Error del servidor, contáctese con el administrador" }]})
     }
   },
 
