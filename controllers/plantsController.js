@@ -1,5 +1,6 @@
 const { escape } = require('mysql2')
 const sql = require('../connection.js')
+require('dotenv').config()
 
 const plantsController = {
   'filterBy': async function (req, res) {
@@ -31,12 +32,12 @@ const plantsController = {
 
       if (startIndex > 0){
         paginado.previous_page = page - 1
-        paginado.next_url = (`http://localhost:3000/plants/filterBy?page=${page - 1}&limit=${limit}&clima=${encodeURIComponent(clima)}&provincia=${encodeURIComponent(provincia)}&tipoPlanta=${encodeURIComponent(tipoPlanta)}`)
+        paginado.previous_url = (`${process.env.HOST_URL}/plants/filterBy?page=${page - 1}&limit=${limit}&clima=${encodeURIComponent(clima)}&provincia=${encodeURIComponent(provincia)}&tipoPlanta=${encodeURIComponent(tipoPlanta)}`)
       }
         
       if (endIndex < totalPags.length - 1) {
         paginado.next_page = page + 1;
-        paginado.next_url = (`http://localhost:3000/plants/filterBy?page=${page + 1}&limit=${limit}&clima=${encodeURIComponent(clima)}&provincia=${encodeURIComponent(provincia)}&tipoPlanta=${encodeURIComponent(tipoPlanta)}`)
+        paginado.next_url = (`${process.env.HOST_URL}/plants/filterBy?page=${page + 1}&limit=${limit}&clima=${encodeURIComponent(clima)}&provincia=${encodeURIComponent(provincia)}&tipoPlanta=${encodeURIComponent(tipoPlanta)}`)
       }
       res.send({ pagination: paginado, data: data })
     } catch (err) {
@@ -80,10 +81,14 @@ const plantsController = {
         total_pages: Math.ceil(totalPags.length / limit)
 
       }
-      if (startIndex > 0) paginado.previous_page = page - 1
+      if (startIndex > 0) {
+        paginado.previous_page = page - 1
+        paginado.previous_url = (`${process.env.HOST_URL}/plants/filterBy?page=${page - 1}&limit=${limit}`)
+        
+      }
       if (endIndex < totalPags.length - 1) {
         paginado.next_page = page + 1;
-        paginado.next_url = `https://huertafacil-back-dev-szgg.2.us-1.fl0.io/plants/getCards?page=${page + 1}&limit=${limit}`
+        paginado.next_url = `${process.env.HOST_URL}/plants/getCards?page=${page + 1}&limit=${limit}`
       }
 
       res.send({ pagination: paginado, data: data })
