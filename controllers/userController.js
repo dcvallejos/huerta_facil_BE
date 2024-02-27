@@ -104,15 +104,15 @@ const userController = {
     // Al igual que getFavs, se chequea si el usuario actual en sesion esta buscando sus propios favoritos
     if (userId != extractedUserId) return res.status(401).send({ errors: [{ "status": 401, "title": "Unauthorized", "message": "No puedes acceder a la informacion otro usuario" }] })
 
-    else if (plantTest.length === 0) return res.status(404).send({errors: [{ "status": 404, "title": "Not found", "message": "La planta ingresada no existe"}]})
+    else if (plantTest.length === 0) return res.status(404).send({ errors: [{ "status": 404, "title": "Not found", "message": "La planta ingresada no existe" }] })
 
     else {
       try {
         await sql`SELECT setFav(${id_usuario},${id_especie})`
-        return res.status(200).send({errors: [{ "status": 200, "title": "Transaction OK", "message": "Favorito agregado"}]})
+        return res.status(200).send({ errors: [{ "status": 200, "title": "Transaction OK", "message": "Favorito agregado" }] })
       }
       catch {
-        return res.status(409).send({errors: [{ "status": 409, "title": "Conflict", "message": "La planta ya esta agregada en el listado de favoritos del usuario"}]})
+        return res.status(409).send({ errors: [{ "status": 409, "title": "Conflict", "message": "La planta ya esta agregada en el listado de favoritos del usuario" }] })
       }
     }
   },
@@ -158,39 +158,25 @@ const userController = {
   'deleteUser': async function (req, res) {
     /*  Elimina un usuario pasado dentro del elemento del body "id_usuario" y activa un trigger 
         que elimina previamente todos sus favoritos */
-    const send = {}
     var id_usuario = req.body.id_usuario
+    var key_usuario = req.body.password
     const userTest = await sql`SELECT checkUserById(${id_usuario})`
+    var loggedUser = req.cookies.jwt
+    var extractedUser = jwt.decode(loggedUser, process.env.SECRET)
+    
+    if (id_usuario != extractedUser.id_usuario) return res.status(401).send({ errors: [{ "status": 401, "title": "Unauthorized", "message": "No puedes borrar a otro usuario" }] })
 
-    if (userTest.length === 0) {
-      send.errors = []
-      const err = {
-        "status": 404,
-        "title": "Not found",
-        "message": "El usuario no existe"
-      }
-      send.errors.push(err)
-      res.send(send)
-    }
+    else if (!bcrypt.compareSync(key_usuario, extractedUser.pass)) return res.status(401).send({ errors: [{ "status": 401, "title": "Unauthorized", "message": "Contraseña incorrecta" }] })
+
     else {
       try {
-        await sql`SELECT deleteUser(${id_usuario})`
-        send.data = {
-          "status": 200,
-          "title": "Transaction OK",
-          "message": 'Usuario correctamente eliminado'
-        }
-        return res.send(send)
+        await sql`SELECT deleteUser(${extractedUser.pass}, ${id_usuario})`
+        res.clearCookie("jwt")
+        return res.status(200).send({ errors: [{ "status": 200, "title": "ransaction OK", "message": "Usuario correctamente eliminado" }] })
       }
-      catch {
-        send.errors = []
-        const err = {
-          "status": 500,
-          "title": "Internal error",
-          "message": "Error del servidor, contáctese con el administrador"
-        }
-        send.errors.push(err)
-        return res.status(500).send(send)
+      catch (error){
+        console.log(error.message)
+        return res.status(500).send({ errors: [{ "status": 500, "title": "Internal server error", "message": "Error del servidor, contáctese con el administrador" }] })
       }
     }
   },
