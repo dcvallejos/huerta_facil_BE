@@ -49,7 +49,6 @@ router.post('/createUser', isLoggedIn, checkSchema(validations), function (req, 
   else createUser(req, res)
 })
 
-router.get('/logout', validateToken, logout)
 
 router.get('/getProvincias', getProvincias)
 
@@ -67,6 +66,8 @@ router.get('/getFavs/:id', idValidations, function (req, res) {
     getFavs(req, res)
   }
 })
+
+router.get('/logout', logout)
 
 router.delete('/deleteUser', checkSchema(delUserValidations), function (req, res) {
   const invalid = validationResult(req)

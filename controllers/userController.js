@@ -297,7 +297,8 @@ const userController = {
     try{
       res.clearCookie("jwt")
       res.status(200).send({ data: [{'status': 200, 'title': 'Transaction OK', 'Message': 'User succesfully logged out'}]})
-    }catch(error){
+    } 
+    catch(error){
       console.log(error)
     }
   }
