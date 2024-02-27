@@ -52,6 +52,7 @@ router.post('/createUser', isLoggedIn, checkSchema(validations), function (req, 
 
 router.get('/getProvincias', getProvincias)
 
+router.get('/logout', logout)
 
 // A partir de aqui todos los endpoints estan sujetos bajo validacion JWT
 
@@ -67,7 +68,6 @@ router.get('/getFavs/:id', idValidations, function (req, res) {
   }
 })
 
-router.get('/logout', logout)
 
 router.delete('/deleteUser', checkSchema(delUserValidations), function (req, res) {
   const invalid = validationResult(req)

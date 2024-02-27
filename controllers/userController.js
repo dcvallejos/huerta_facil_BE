@@ -1,7 +1,7 @@
 // llamar a la conexión 
 const sql = require('../connection.js')
 const bcrypt = require('bcrypt')
-const { generateToken } = require('../utils/token')
+const { generateToken, isLoggedIn } = require('../utils/token')
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
@@ -18,7 +18,7 @@ const userController = {
         return res.status(409).send({ errors: [{ status: "409", title: "Conflict", message: 'El usuario no existe' }] })
       }
       else if (bcrypt.compareSync(password, user.pass)) {
-        const token = generateToken(user)        
+        const token = generateToken(user)
         send.data = { type: 'response', attributes: { status: "200", title: "Transaction OK", message: 'Sesión iniciada' } }
         res.cookie('jwt', token)
       }
@@ -293,15 +293,15 @@ const userController = {
       })
     }
   },
-  'logout': function(req,res){
-    try{
-      res.clearCookie("jwt")
-      res.status(200).send({ data: [{'status': 200, 'title': 'Transaction OK', 'Message': 'User succesfully logged out'}]})
-    } 
-    catch(error){
-      console.log(error)
-    }
+  'logout': function (req, res) {
+    const inSession = req.cookies.jwt
+      if (inSession) {
+        res.clearCookie("jwt")
+        res.status(200).send({ data: [{ 'status': 200, 'title': 'Transaction OK', 'Message': 'Sesion correctamente cerrada' }] })
+      }
+      else {
+        res.status(403).send({ data: [{ 'status': 403, 'title': 'Forbidden', 'Message': 'Necesitas inciar sesion antes' }] })
+      }
   }
-
 }
 module.exports = userController;
