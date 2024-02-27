@@ -74,6 +74,36 @@ try {
 }
 },
 'filterBy': function(req, res){
+},
+
+'getProvincias': async function (req, res) {
+  // Devuelve listado completo de provincias con su numero de Id
+  try {
+    const data = await sql `SELECT * FROM getProvinces()`
+    return res.send({ data })
+  } catch {
+    return res.status(500).send({ errors: [{ "status": 500, "title": "Internal error", "message": "Error del servidor, contáctese con el administrador" }]})
+  }
+},
+
+'getClimas': async function (req, res) {
+  // Devuelve listado completo de climas con su numero de Id
+  try {
+    const data = await sql`SELECT * FROM getWeathers()`
+    return res.send({ data })
+  } catch {
+    return res.status(500).send({ errors: [{ "status": 500, "title": "Internal error", "message": "Error del servidor, contáctese con el administrador" }]})
+  }
+},
+
+'getTiposPlanta': async function (req, res) {
+  // Devuelve listado completo de tipos de planta con su numero de Id
+  try {
+    const data = await sql`SELECT * FROM getPlantTypes()`
+    return res.send({ data })
+  } catch {
+    return res.status(500).send({ errors: [{ "status": 500, "title": "Internal error", "message": "Error del servidor, contáctese con el administrador" }]})
+  }
 }
 }
 

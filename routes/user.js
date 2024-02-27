@@ -8,7 +8,7 @@ const delUserValidations = require('../utils/deleteUserVal.js')
 const updateUserValidations = require('../utils/updateUserVal.js')
 const setPasswordValidations = require('../utils/setPasswordVal.js')
 const { checkSchema, validationResult } = require('express-validator')
-const { login, createUser, getFavs, setFav, updateUser, deleteUser, getProvincias, setPassword, logout } = require('../controllers/userController')
+const { login, createUser, getFavs, setFav, updateUser, deleteUser, setPassword, logout } = require('../controllers/userController')
 const cookieParser = require('cookie-parser')
 const { validateToken } = require('../utils/token')
 const { isLoggedIn } = require('../utils/token')
@@ -48,8 +48,6 @@ router.post('/createUser', isLoggedIn, checkSchema(validations), function (req, 
   }
   else createUser(req, res)
 })
-
-router.get('/getProvincias', getProvincias)
 
 router.get('/logout', logout)
 

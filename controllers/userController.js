@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
 const userController = {
+
   'login': async function (req, res) {
     const usuario = req.body.usuario
     const password = req.body.password
@@ -38,6 +39,7 @@ const userController = {
       })
     }
   },
+
   'createUser': async function (req, res) {
 
     const email = req.body.email,
@@ -72,6 +74,7 @@ const userController = {
 
 
   },
+
   'getFavs': async function (req, res) {
     /*Retorna todas los nombres de las plantas favoritas del usuario logueado, precisa que el mismo este en sesion iniciada*/
     const send = {}
@@ -93,6 +96,7 @@ const userController = {
       }
     }
   },
+
   'setFav': async function (req, res) {
     const send = {}
     var id_usuario = req.body.id_usuario
@@ -116,6 +120,7 @@ const userController = {
       }
     }
   },
+  
   'updateUser': async function (req, res) {
     const cookieToken = req.cookies.jwt
     const userData = jwt.verify(cookieToken, process.env.SECRET)
@@ -182,21 +187,7 @@ const userController = {
       }
     }
   },
-  'getProvincias': async function (req, res) {
-    try {
-      const data = await sql`SELECT * FROM getProvincias()`
-      return res.send({ data })
-    } catch {
-      return res.status(500).send({
-        errors: [
-          {
-            "status": 500,
-            "title": "Internal error",
-            "message": "Error del servidor, contáctese con el administrador"
-          }]
-      })
-    }
-  },
+
   'setPassword': async function (req, res) {
     const passwordActual = req.body.passwordActual
     const nuevoPassword = req.body.nuevoPassword
