@@ -120,7 +120,7 @@ const userController = {
         await sql`SELECT updateUser(${userData.id_usuario}, ${email}, ${provincia}, NULL , ${nombre})`
 
         // Cambiar por un SP o modificar sp updateUser para que devuelva los datos modificados
-        const user = await sql`SELECT * FROM usuarios WHERE id_usuario = ${userData.id_usuario}`
+        const user = await sql`SELECT * FROM getUserById(${userData.id_usuario})`
         const token = generateToken(user[0])
         res.cookie('jwt', token)
         res.send({ type: 'response', attributes: { status: "200", title: "Transaction OK", message: 'Datos modificados correctamente' } })
