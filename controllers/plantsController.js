@@ -13,7 +13,6 @@ const plantsController = {
     const startIndex = (page - 1) * limit
     const endIndex = page * limit
 
-    console.log(decodeURIComponent(tipoPlanta))
     try {
       tipoPlanta === "null" ? tipoPlanta = null : decodeURIComponent(tipoPlanta)
       provincia === "null" ? provincia = null : decodeURIComponent(provincia)
@@ -42,14 +41,7 @@ const plantsController = {
       res.send({ pagination: paginado, data: data })
     } catch (err) {
       console.log(err)
-      res.status(500).send({
-        errors: [
-          {
-            "status": 500,
-            "title": "Internal error",
-            "message": "Error del servidor, contáctese con el administrador"
-          }]
-      })
+      res.status(500).send({ errors: [ {"status": 500, "title": "Internal error", "message": "Error del servidor, contáctese con el administrador" }]})
     }
   },
   'getPlantById': async function (req, res) {
@@ -58,31 +50,15 @@ const plantsController = {
     try {
       const data = await sql`SELECT * FROM getByID(${id})`
 
-      if (data.length === 0) {
-        const send = {
-          "errors": [{
-            "status": 404,
-            "title": "Not found",
-            "message": "No existe esa planta"
-          }]
-        }
-        res.send(send)
-      } else {
-        const send = {
-          "data": data
-        }
-        res.send(send)
-      }
-    } catch {
-      res.status(500).send({
-        errors: [
-          {
-            "status": 500,
-            "title": "Internal error",
-            "message": "Error del servidor, contáctese con el administrador"
-          }]
-      })
+      if (data.length === 0)  res.status(404).send({"errors": [{"status": 404,"title": "Not found", "message": "No existe esa planta" }] })
+
+      else res.send({"data": data })
+
+    } 
+    catch {
+      res.status(500).send({ errors: [ { "status": 500, "title": "Internal error", "message": "Error del servidor, contáctese con el administrador" }]})
     }
+
   },
   'getCards': async function (req, res) {
     // agregar lógica de paginado
@@ -91,8 +67,6 @@ const plantsController = {
 
     const startIndex = (page - 1) * limit
     const endIndex = page * limit
-
-
 
     try {
       const totalPags = await sql`SELECT * FROM getCards()`
@@ -113,17 +87,8 @@ const plantsController = {
       res.send({ pagination: paginado, data: data })
     } catch (err) {
       console.log(err)
-      res.status(500).send({
-        errors: [
-          {
-            "status": 500,
-            "title": "Internal error",
-            "message": "Error del servidor, contáctese con el administrador"
-          }]
-      })
+      res.status(500).send({ errors: [ {"status": 500,"title": "Internal error", "message": "Error del servidor, contáctese con el administrador" }] })
     }
-  },
-  'filterBy': function (req, res) {
   },
 
   'getProvincias': async function (req, res) {

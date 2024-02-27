@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const {getFilters, getPlantById, getCards, filterBy, getProvincias, getClimas, getTiposPlanta } = require('../controllers/plantsController')
+const {getFilters, getPlantById, getCards, getProvincias, getClimas, getTiposPlanta } = require('../controllers/plantsController')
 const { validationResult } = require('express-validator')
 const validators = require('../utils/plantVal.js')
 
@@ -24,7 +24,7 @@ router.get('/getTiposPlanta', getTiposPlanta)
 
 router.get('/getCards', getCards)
 
-router.post('/filterBy', filterBy)
+router.post('/getFilters', getFilters)
 
 
 module.exports = router;
