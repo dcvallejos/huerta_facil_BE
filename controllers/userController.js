@@ -164,8 +164,10 @@ const userController = {
     var loggedUser = req.cookies.jwt
     var extractedUser = jwt.decode(loggedUser, process.env.SECRET)
     
+    // Bloquea borrado de usuario ajeno al sesionado
     if (id_usuario != extractedUser.id_usuario) return res.status(401).send({ errors: [{ "status": 401, "title": "Unauthorized", "message": "No puedes borrar a otro usuario" }] })
 
+    // Verifica si la password hasheada coincide con la enviada
     else if (!bcrypt.compareSync(key_usuario, extractedUser.pass)) return res.status(401).send({ errors: [{ "status": 401, "title": "Unauthorized", "message": "Contraseña incorrecta" }] })
 
     else {
@@ -202,36 +204,25 @@ const userController = {
     const userData = jwt.verify(cookieToken, process.env.SECRET)
 
     try {
-      if (!bcrypt.compareSync(passwordActual, userData.pass)) {
-        res.send({
-          errors: [{
-            "status": 409,
-            "title": "Conflict",
-            "message": "Password incorrecto"
-          }]
-        })
-      } else {
+      if (!bcrypt.compareSync(passwordActual, userData.pass)) res.status(409).send({ errors: [{ "status": 409, "title": "Conflict","message": "Password incorrecto" }] })
+      else {
         const hashPass = bcrypt.hashSync(nuevoPassword, 12)
         await sql`SELECT updateUser(${userData.id_usuario}, NULL, NULL, ${hashPass} , NULL)`
+
         // Cambiar por un SP o modificar sp updateUser para que devuelva los datos modificados
         const user = await sql`SELECT * FROM usuarios WHERE id_usuario = ${userData.id_usuario}`
         const token = generateToken(user[0])
         res.cookie('jwt', token)
-        res.send({ type: 'response', attributes: { status: "200", title: "Transaction OK", message: 'Contraseña modificada correctamente' } })
+        res.status(200).send({ type: 'response', attributes: { status: "200", title: "Transaction OK", message: 'Contraseña modificada correctamente' } })
       }
     } catch (err) {
       console.log(err)
-      res.status(500).send({
-        errors: [
-          {
-            "status": 500,
-            "title": "Internal error",
-            "message": "Error del servidor, contáctese con el administrador"
-          }]
-      })
+      res.status(500).send({ errors: [ {"status": 500, "title": "Internal error","message": "Error del servidor, contáctese con el administrador" }]})
     }
   },
+
   'logout': function (req, res) {
+    // solo verifica que haya una cookie (cualquiera con titulo jwt) para poder cerrar la sesion
     const inSession = req.cookies.jwt
     if (inSession) {
       res.clearCookie("jwt")
