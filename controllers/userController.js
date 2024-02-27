@@ -76,43 +76,20 @@ const userController = {
     /*Retorna todas los nombres de las plantas favoritas del usuario logueado, precisa que el mismo este en sesion iniciada*/
     const send = {}
     var userId = req.params.id
-    const test = await sql`SELECT checkUserById(${userId})`
+    var loggedUser = req.cookies.jwt
+    var extractedUserId = jwt.decode(loggedUser, process.env.SECRET)["id_usuario"]
     const data = await sql`SELECT * FROM getFavs(${userId})`
 
-    if (test.length === 0) {
-      send.errors = []
-      const err = {
-        "status": 404,
-        "title": "Not Found",
-        "message": "El usuario no existe"
-      }
-      send.errors.push(err)
-      return res.send(send)
-    }
-    else if (data.length === 0) {
-      send.errors = []
-      const err = {
-        "status": 404,
-        "title": "Not Found",
-        "message": "El usuario no tiene favoritos"
-      }
-      send.errors.push(err)
-      return res.send(send)
-    }
+    // De esta forma solo el usuario con el id_usuario sesionado puede acceder a su propia informacion
+    if (userId != extractedUserId) return res.status(401).send({ errors: [{ "status": 401, "title": "Unauthorized", "message": "No puedes acceder a la informacion otro usuario" }] })
+
+    else if (data.length === 0) return res.status(404).send({ errors: [{ "status": 404, "title": "Not Found", "message": "El usuario no tiene favoritos" }] })
+
     else {
       try {
-        send.data = data
-        return res.send(send)
-
+        return res.send(data)
       } catch (error) {
-        return res.status(500).send({
-          errors: [
-            {
-              "status": 500,
-              "title": "Internal error",
-              "message": "Error del servidor, contáctese con el administrador"
-            }]
-        })
+        return res.status(500).send({ errors: [{ "status": 500, "title": "Internal error", "message": "Error del servidor, contáctese con el administrador" }] })
       }
     }
   },
@@ -204,9 +181,9 @@ const userController = {
     }
   },
 
-  'deleteUser': async function (req, res) {    
-  /*  Elimina un usuario pasado dentro del elemento del body "id_usuario" y activa un trigger 
-      que elimina previamente todos sus favoritos */
+  'deleteUser': async function (req, res) {
+    /*  Elimina un usuario pasado dentro del elemento del body "id_usuario" y activa un trigger 
+        que elimina previamente todos sus favoritos */
     const send = {}
     var id_usuario = req.body.id_usuario
     const userTest = await sql`SELECT checkUserById(${id_usuario})`
@@ -296,13 +273,13 @@ const userController = {
   },
   'logout': function (req, res) {
     const inSession = req.cookies.jwt
-      if (inSession) {
-        res.clearCookie("jwt")
-        res.status(200).send({ data: [{ 'status': 200, 'title': 'Transaction OK', 'Message': 'Sesion correctamente cerrada' }] })
-      }
-      else {
-        res.status(403).send({ data: [{ 'status': 403, 'title': 'Forbidden', 'Message': 'Necesitas inciar sesion antes' }] })
-      }
+    if (inSession) {
+      res.clearCookie("jwt")
+      res.status(200).send({ data: [{ 'status': 200, 'title': 'Transaction OK', 'Message': 'Sesion correctamente cerrada' }] })
+    }
+    else {
+      res.status(403).send({ data: [{ 'status': 403, 'title': 'Forbidden', 'Message': 'Necesitas inciar sesion antes' }] })
+    }
   }
 }
 module.exports = userController;
