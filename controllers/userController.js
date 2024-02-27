@@ -97,48 +97,22 @@ const userController = {
     const send = {}
     var id_usuario = req.body.id_usuario
     var id_especie = req.body.id_especie
-    const userTest = await sql`SELECT checkUserById(${id_usuario})`
+    var loggedUser = req.cookies.jwt
+    var extractedUserId = jwt.decode(loggedUser, process.env.SECRET)["id_usuario"]
     const plantTest = await sql`SELECT * FROM getById(${id_especie})`
 
-    if (userTest.length === 0) {
-      send.errors = []
-      const err = {
-        "status": 404,
-        "title": "Not found",
-        "message": "El usuario no existe"
-      }
-      send.errors.push(err)
-      return res.send(send)
-    }
-    else if (plantTest.length === 0) {
-      send.errors = []
-      const err = {
-        "status": 404,
-        "title": "Not found",
-        "message": "La planta ingresada no existe"
-      }
-      send.errors.push(err)
-      return res.send(send)
-    }
+    // Al igual que getFavs, se chequea si el usuario actual en sesion esta buscando sus propios favoritos
+    if (userId != extractedUserId) return res.status(401).send({ errors: [{ "status": 401, "title": "Unauthorized", "message": "No puedes acceder a la informacion otro usuario" }] })
+
+    else if (plantTest.length === 0) return res.status(404).send({errors: [{ "status": 404, "title": "Not found", "message": "La planta ingresada no existe"}]})
+
     else {
       try {
         await sql`SELECT setFav(${id_usuario},${id_especie})`
-        send.data = {
-          "status": 200,
-          "title": "Transaction OK",
-          "message": 'Favorito agregado'
-        }
-        return res.send(send)
+        return res.status(200).send({errors: [{ "status": 200, "title": "Transaction OK", "message": "Favorito agregado"}]})
       }
       catch {
-        send.errors = []
-        const err = {
-          "status": 409,
-          "title": "Conflict",
-          "message": "La planta ya esta agregada en el listado de favoritos del usuario"
-        }
-        send.errors.push(err)
-        return res.send(send)
+        return res.status(409).send({errors: [{ "status": 409, "title": "Conflict", "message": "La planta ya esta agregada en el listado de favoritos del usuario"}]})
       }
     }
   },
