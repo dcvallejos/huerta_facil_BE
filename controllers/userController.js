@@ -95,31 +95,9 @@ const userController = {
         return res.status(200).send({ errors: [{ "status": 200, "title": "Transaction OK", "message": "Favorito agregado" }] })
       }
       catch {
-        return res.status(409).send({ errors: [{ "status": 409, "title": "Conflict", "message": "La planta ya esta agregada en el listado de favoritos del usuario" }] })
-      }
-    }
-  },
-
-  'deleteFav': async function (req, res) {
-    const send = {}
-    var id_usuario = req.body.id_usuario
-    var id_especie = req.body.id_especie
-    var loggedUser = req.cookies.jwt
-    var extractedUserId = jwt.decode(loggedUser, process.env.SECRET)["id_usuario"]
-    const plantTest = await sql`SELECT * FROM getById(${id_especie})`
-
-    // Al igual que getFavs, se chequea si el usuario actual en sesion esta buscando sus propios favoritos
-    if (id_usuario != extractedUserId) return res.status(401).send({ errors: [{ "status": 401, "title": "Unauthorized", "message": "No puedes borrar informacion de otro usuario" }] })
-
-    else if (plantTest.length === 0) return res.status(404).send({ errors: [{ "status": 404, "title": "Not found", "message": "La planta ingresada no existe" }] })
-
-    else {
-      try {
+        // Borra la planta en el caso de que esta ya este en el listado de favoritos
         await sql`SELECT deleteFav(${id_usuario},${id_especie})`
-        return res.status(200).send({ errors: [{ "status": 200, "title": "Transaction OK", "message": "Favorito eliminado" }] })
-      }
-      catch {
-        return res.status(409).send({ errors: [{ "status": 409, "title": "Conflict", "message": "La planta ya no existe en el listado de favoritos del usuario" }] })
+        res.status(200).send({ errors: [{ "status": 200, "title": "Transaction OK", "message": "Planta eliminada del listado de favoritos del usuario" }] })
       }
     }
   },

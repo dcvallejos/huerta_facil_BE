@@ -2,7 +2,7 @@ const { escape } = require('mysql2')
 const sql = require('../connection.js')
 
 const plantsController = {
-  'getFilters': async function (req, res) {
+  'filterBy': async function (req, res) {
     // agregar lógica de paginado
     const page = parseInt(req.query.page) || null
     const limit = parseInt(req.query.limit) || null
@@ -44,6 +44,7 @@ const plantsController = {
       res.status(500).send({ errors: [ {"status": 500, "title": "Internal error", "message": "Error del servidor, contáctese con el administrador" }]})
     }
   },
+  
   'getPlantById': async function (req, res) {
     const id = req.params.id
 
@@ -60,6 +61,7 @@ const plantsController = {
     }
 
   },
+
   'getCards': async function (req, res) {
     // agregar lógica de paginado
     const page = parseInt(req.query.page) || null

@@ -8,7 +8,7 @@ const delUserValidations = require('../utils/deleteUserVal.js')
 const updateUserValidations = require('../utils/updateUserVal.js')
 const setPasswordValidations = require('../utils/setPasswordVal.js')
 const { checkSchema, validationResult } = require('express-validator')
-const { deleteFav, login, createUser, getFavs, setFav, updateUser, deleteUser, setPassword, logout } = require('../controllers/userController')
+const { login, createUser, getFavs, setFav, updateUser, deleteUser, setPassword, logout } = require('../controllers/userController')
 const cookieParser = require('cookie-parser')
 const { validateToken, isLoggedIn } = require('../utils/token')
 
@@ -86,19 +86,6 @@ router.post('/setFav/', checkSchema(favsValidations), function (req, res) {
   }
   else {
     setFav(req, res)
-  }
-})
-
-router.delete('/deleteFav/', checkSchema(favsValidations), function (req, res) {
-  const invalid = validationResult(req)
-  if (!invalid.isEmpty()) {
-    const send = {
-      "errors": invalid
-    }
-    res.send(send)
-  }
-  else {
-    deleteFav(req, res)
   }
 })
 
