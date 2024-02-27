@@ -8,13 +8,14 @@ const delUserValidations = require('../utils/deleteUserVal.js')
 const updateUserValidations = require('../utils/updateUserVal.js')
 const setPasswordValidations = require('../utils/setPasswordVal.js')
 const { checkSchema, validationResult } = require('express-validator')
-const { login, createUser, getFavs, setFav, updateUser, deleteUser, getProvincias, setPassword } = require('../controllers/userController')
+const { login, createUser, getFavs, setFav, updateUser, deleteUser, getProvincias, setPassword, logout } = require('../controllers/userController')
 const cookieParser = require('cookie-parser')
 const { validateToken } = require('../utils/token')
+const { isLoggedIn } = require('../utils/token')
 
 router.use(cookieParser())
 
-router.post('/login', checkSchema(loginValidations), function(req,res) {
+router.post('/login', isLoggedIn, checkSchema(loginValidations), function(req,res) {
   const invalid = validationResult(req)
   if (!invalid.isEmpty()) {
     invalid.errors.some(el => el.path === 'body') ?
@@ -32,7 +33,7 @@ router.post('/login', checkSchema(loginValidations), function(req,res) {
   }
 })
 
-router.post('/createUser', checkSchema(validations), function (req, res) {
+router.post('/createUser', isLoggedIn, checkSchema(validations), function (req, res) {
   const invalid = validationResult(req)
   if(!invalid.isEmpty()){
     invalid.errors.some(el => el.path === 'body') ?
@@ -45,8 +46,9 @@ router.post('/createUser', checkSchema(validations), function (req, res) {
     :
     res.send(invalid)
   }
-  createUser(req, res)
+  else createUser(req, res)
 })
+
 
 router.get('/getProvincias', getProvincias)
 
@@ -64,6 +66,8 @@ router.get('/getFavs/:id', idValidations, function (req, res) {
     getFavs(req, res)
   }
 })
+
+router.get('/logout', logout)
 
 router.delete('/deleteUser', checkSchema(delUserValidations), function (req, res) {
   const invalid = validationResult(req)

@@ -10,36 +10,33 @@ const userController = {
     const usuario = req.body.usuario
     const password = req.body.password
     const send = {}
-
     try {
-      const data = await sql `SELECT * FROM usuarios WHERE usuario = ${usuario}`
-
-    if(data.length === 0){
-      send.errors = [{status: "409", title: "Conflict", message: 'El usuario no existe' }]
-      res.send(send)
-    } else {
+      const data = await sql`SELECT * FROM usuarios WHERE usuario = ${usuario}`
       const user = data[0]
 
-      if(bcrypt.compareSync(password, user.pass)){
-        const token = generateToken(user)
-        send.data = {type: 'response', attributes: {status: "200", title: "Transaction OK", message: 'Sesión iniciada', token: token}}
+      if (data.length === 0) {
+        return res.status(409).send({ errors: [{ status: "409", title: "Conflict", message: 'El usuario no existe' }] })
+      }
+      else if (bcrypt.compareSync(password, user.pass)) {
+        const token = generateToken(user)        
+        send.data = { type: 'response', attributes: { status: "200", title: "Transaction OK", message: 'Sesión iniciada' } }
         res.cookie('jwt', token)
       }
-      else { 
-        send.errors = [{status: "409", title: "Conflict", message: 'Contraseña incorrecta' }]
+      else {
+        send.errors = [{ status: "409", title: "Conflict", message: 'Contraseña incorrecta' }]
       }
-      res.send(send)
+      return res.send(send)
     }
-    } catch {
-      res.status(500).send({errors: [
-        {
-          "status": 500,
-          "title": "Internal error",
-          "message": "Error del servidor, contáctese con el administrador"
-        }]
+    catch {
+      res.status(500).send({
+        errors: [
+          {
+            "status": 500,
+            "title": "Internal error",
+            "message": "Error del servidor, contáctese con el administrador"
+          }]
       })
     }
-    
   },
   'createUser': async function (req, res) {
 
@@ -47,29 +44,32 @@ const userController = {
       provincia = req.body.provincia,
       password = req.body.password,
       nombre = req.body.nombre;
-try {
-  const test = await sql`SELECT checkUserName(${email})`
-    if (test.length >= 1) {
-      res.send({errors: [{
-        "status": 409,
-        "title": "Conflict",
-        "message": "Email en uso. Utilice otro"
-      }]})
-    } else {
-      const hashPass = bcrypt.hashSync(password, 12)
-      await sql`SELECT createUser(${email}, ${provincia}, ${hashPass}, ${nombre})`
-      res.send({type: 'response', attributes: {status: "200", title: "Transaction OK", message: 'Datos modificados correctamente'}})
+    try {
+      const test = await sql`SELECT checkUserName(${email})`
+      if (test.length >= 1) {
+        return res.send({
+          errors: [{
+            "status": 409,
+            "title": "Conflict",
+            "message": "Email en uso. Utilice otro"
+          }]
+        })
+      } else {
+        const hashPass = bcrypt.hashSync(password, 12)
+        await sql`SELECT createUser(${email}, ${provincia}, ${hashPass}, ${nombre})`
+        return res.send({ type: 'response', attributes: { status: "200", title: "Transaction OK", message: 'Datos modificados correctamente' } })
+      }
+    } catch {
+      return res.status(500).send({
+        errors: [
+          {
+            "status": 500,
+            "title": "Internal error",
+            "message": "Error del servidor, contáctese con el administrador"
+          }]
+      })
     }
-} catch {
-  res.status(500).send({errors: [
-    {
-      "status": 500,
-      "title": "Internal error",
-      "message": "Error del servidor, contáctese con el administrador"
-    }]
-  })
-}
-    
+
 
   },
   'getFavs': async function (req, res) {
@@ -77,7 +77,6 @@ try {
     var userId = req.params.id
     const test = await sql`SELECT checkUserById(${userId})`
     const data = await sql`SELECT * FROM getFavs(${userId})`
-
 
     if (test.length === 0) {
       send.errors = []
@@ -87,7 +86,7 @@ try {
         "message": "El usuario no existe"
       }
       send.errors.push(err)
-      res.send(send)
+      return res.send(send)
     }
     else if (data.length === 0) {
       send.errors = []
@@ -97,11 +96,23 @@ try {
         "message": "El usuario no tiene favoritos"
       }
       send.errors.push(err)
-      res.send(send)
+      return res.send(send)
     }
     else {
-      send.data = data
-      res.send(send)
+      try {
+        send.data = data
+        return res.send(send)
+
+      } catch (error) {
+        return res.status(500).send({
+          errors: [
+            {
+              "status": 500,
+              "title": "Internal error",
+              "message": "Error del servidor, contáctese con el administrador"
+            }]
+        })
+      }
     }
   },
   'setFav': async function (req, res) {
@@ -119,7 +130,7 @@ try {
         "message": "El usuario no existe"
       }
       send.errors.push(err)
-      res.send(send)
+      return res.send(send)
     }
     else if (plantTest.length === 0) {
       send.errors = []
@@ -129,7 +140,7 @@ try {
         "message": "La planta ingresada no existe"
       }
       send.errors.push(err)
-      res.send(send)
+      return res.send(send)
     }
     else {
       try {
@@ -139,7 +150,7 @@ try {
           "title": "Transaction OK",
           "message": 'Favorito agregado'
         }
-        res.send(send)
+        return res.send(send)
       }
       catch {
         send.errors = []
@@ -149,7 +160,7 @@ try {
           "message": "La planta ya esta agregada en el listado de favoritos del usuario"
         }
         send.errors.push(err)
-        res.send(send)
+        return res.send(send)
       }
     }
   },
@@ -157,34 +168,37 @@ try {
     const cookieToken = req.cookies.jwt
     const userData = jwt.verify(cookieToken, process.env.SECRET)
 
-    const email = req.body.email|| null
+    const email = req.body.email || null
     const provincia = req.body.provincia || null
     const nombre = req.body.nombre || null
-  
+
     try {
       const test = await sql`SELECT checkUserName(${email})`
-        if (test.length >= 1) {
-          res.send({errors: [{
+      if (test.length >= 1) {
+        res.send({
+          errors: [{
             "status": 409,
             "title": "Conflict",
             "message": "Email en uso. Utilice otro"
-          }]})
-        } else {
-          await sql`SELECT updateUser(${userData.id_usuario}, ${email}, ${provincia}, NULL , ${nombre})`
-          // Cambiar por un SP o modificar sp updateUser para que devuelva los datos modificados
-          const user = await sql`SELECT * FROM usuarios WHERE id_usuario = ${userData.id_usuario}`
-          const token = generateToken(user[0])
-          res.cookie('jwt', token)
-          res.send({type: 'response', attributes: {status: "200", title: "Transaction OK", message: 'Datos modificados correctamente'}})
-        }
+          }]
+        })
+      } else {
+        await sql`SELECT updateUser(${userData.id_usuario}, ${email}, ${provincia}, NULL , ${nombre})`
+        // Cambiar por un SP o modificar sp updateUser para que devuelva los datos modificados
+        const user = await sql`SELECT * FROM usuarios WHERE id_usuario = ${userData.id_usuario}`
+        const token = generateToken(user[0])
+        res.cookie('jwt', token)
+        res.send({ type: 'response', attributes: { status: "200", title: "Transaction OK", message: 'Datos modificados correctamente' } })
+      }
     } catch (err) {
       console.log(err)
-      res.status(500).send({errors: [
-        {
-          "status": 500,
-          "title": "Internal error",
-          "message": "Error del servidor, contáctese con el administrador"
-        }]
+      res.status(500).send({
+        errors: [
+          {
+            "status": 500,
+            "title": "Internal error",
+            "message": "Error del servidor, contáctese con el administrador"
+          }]
       })
     }
   },
@@ -214,7 +228,7 @@ try {
           "title": "Transaction OK",
           "message": 'Usuario correctamente eliminado'
         }
-        res.send(send)
+        return res.send(send)
       }
       catch {
         send.errors = []
@@ -224,56 +238,70 @@ try {
           "message": "Error del servidor, contáctese con el administrador"
         }
         send.errors.push(err)
-        res.status(500).send(send)
+        return res.status(500).send(send)
       }
     }
   },
-  'getProvincias': async function(req, res){
+  'getProvincias': async function (req, res) {
     try {
-    const data = await sql`SELECT * FROM getProvincias()`
-    res.send({data})
+      const data = await sql`SELECT * FROM getProvincias()`
+      return res.send({ data })
     } catch {
-      res.status(500).send({errors: [
-        {
-          "status": 500,
-          "title": "Internal error",
-          "message": "Error del servidor, contáctese con el administrador"
-        }]
+      return res.status(500).send({
+        errors: [
+          {
+            "status": 500,
+            "title": "Internal error",
+            "message": "Error del servidor, contáctese con el administrador"
+          }]
       })
     }
   },
-  'setPassword': async function(req, res){
+  'setPassword': async function (req, res) {
     const passwordActual = req.body.passwordActual
     const nuevoPassword = req.body.nuevoPassword
     const cookieToken = req.cookies.jwt
     const userData = jwt.verify(cookieToken, process.env.SECRET)
 
     try {
-      if(!bcrypt.compareSync(passwordActual, userData.pass)){
-        res.send({errors: [{
-          "status": 409,
-          "title": "Conflict",
-          "message": "Password incorrecto"
-        }]})
+      if (!bcrypt.compareSync(passwordActual, userData.pass)) {
+        res.send({
+          errors: [{
+            "status": 409,
+            "title": "Conflict",
+            "message": "Password incorrecto"
+          }]
+        })
       } else {
-          const hashPass = bcrypt.hashSync(nuevoPassword, 12)
-          await sql`SELECT updateUser(${userData.id_usuario}, NULL, NULL, ${hashPass} , NULL)`
-          // Cambiar por un SP o modificar sp updateUser para que devuelva los datos modificados
-          const user = await sql`SELECT * FROM usuarios WHERE id_usuario = ${userData.id_usuario}`
-          const token = generateToken(user[0])
-          res.cookie('jwt', token)
-          res.send({type: 'response', attributes: {status: "200", title: "Transaction OK", message: 'Contraseña modificada correctamente'}})
-        }
+        const hashPass = bcrypt.hashSync(nuevoPassword, 12)
+        await sql`SELECT updateUser(${userData.id_usuario}, NULL, NULL, ${hashPass} , NULL)`
+        // Cambiar por un SP o modificar sp updateUser para que devuelva los datos modificados
+        const user = await sql`SELECT * FROM usuarios WHERE id_usuario = ${userData.id_usuario}`
+        const token = generateToken(user[0])
+        res.cookie('jwt', token)
+        res.send({ type: 'response', attributes: { status: "200", title: "Transaction OK", message: 'Contraseña modificada correctamente' } })
+      }
     } catch (err) {
       console.log(err)
-      res.status(500).send({errors: [
-        {
-          "status": 500,
-          "title": "Internal error",
-          "message": "Error del servidor, contáctese con el administrador"
-        }]
+      res.status(500).send({
+        errors: [
+          {
+            "status": 500,
+            "title": "Internal error",
+            "message": "Error del servidor, contáctese con el administrador"
+          }]
       })
     }
+  },
+  'logout': function(req,res){
+    try{
+      res.clearCookie("jwt")
+      res.status(200).send({ data: [{'status': 200, 'title': 'Transaction OK', 'Message': 'User succesfully logged out'}]})
+    } 
+    catch(error){
+      console.log(error)
+    }
   }
+
 }
 module.exports = userController;
