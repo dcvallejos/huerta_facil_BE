@@ -2,7 +2,7 @@ const { escape } = require('mysql2')
 const sql = require('../connection.js')
 
 const plantsController = {
-  'getFilters': async function (req, res) {
+  'getFilterBy': async function (req, res) {
     // agregar lógica de paginado
     const page = parseInt(req.query.page) || null
     const limit = parseInt(req.query.limit) || null
