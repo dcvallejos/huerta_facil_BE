@@ -20,7 +20,7 @@ const customs = {
     const nuevoPassword = req.body.nuevoPassword
     const passwordRepetido = req.body.passwordRepetido
 
-    return nuevoPassword = passwordRepetido
+    return nuevoPassword === passwordRepetido
   }
 }
 
