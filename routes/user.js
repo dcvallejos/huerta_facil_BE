@@ -57,17 +57,6 @@ router.use(validateToken)
 
 router.get('/getFavs', getFavs)
 
-router.delete('/deleteUser', checkSchema(delUserValidations), function (req, res) {
-  const invalid = validationResult(req)
-  console.log(invalid)
-  if (!invalid.isEmpty()) {
-    res.send(invalid)
-  }
-  else {
-    deleteUser(req, res)
-  }
-})
-
 router.post('/setFav/', checkSchema(favsValidations), function (req, res) {
   const invalid = validationResult(req)
   if (!invalid.isEmpty()) {
@@ -78,6 +67,17 @@ router.post('/setFav/', checkSchema(favsValidations), function (req, res) {
   }
   else {
     setFav(req, res)
+  }
+})
+
+router.delete('/deleteUser', checkSchema(delUserValidations), function (req, res) {
+  const invalid = validationResult(req)
+  console.log(invalid)
+  if (!invalid.isEmpty()) {
+    res.send(invalid)
+  }
+  else {
+    deleteUser(req, res)
   }
 })
 

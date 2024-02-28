@@ -1,5 +1,5 @@
 const validations = {
-  id_usuario :  {
+  /*id_usuario :  {
     custom:{
       options: val =>{
         return Number.isInteger(val)
@@ -13,7 +13,7 @@ const validations = {
     isInt: {
       errorMessage: 'Ingrese un numero correcto del Id del usuario'
     }
-  },
+  },*/
   id_especie:{
     custom:{
       options: val =>{

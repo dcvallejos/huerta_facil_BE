@@ -72,17 +72,14 @@ const userController = {
   },
 
   'setFav': async function (req, res) {
-    const send = {}
-    var id_usuario = req.body.id_usuario
+
+    // Datos de usuario tomados desde el token
+    var loggedUser = jwt.decode(req.cookies.jwt, process.env.SECRET)
+    var id_usuario = loggedUser["id_usuario"]
     var id_especie = req.body.id_especie
-    var loggedUser = req.cookies.jwt
-    var extractedUserId = jwt.decode(loggedUser, process.env.SECRET)["id_usuario"]
     const plantTest = await sql`SELECT * FROM getById(${id_especie})`
 
-    // Al igual que getFavs, se chequea si el usuario actual en sesion esta buscando sus propios favoritos
-    if (id_usuario != extractedUserId) return res.status(401).send({ errors: [{ "status": 401, "title": "Unauthorized", "message": "No puedes acceder a la informacion otro usuario" }] })
-
-    else if (plantTest.length === 0) return res.status(404).send({ errors: [{ "status": 404, "title": "Not found", "message": "La planta ingresada no existe" }] })
+    if (plantTest.length === 0) return res.status(404).send({ errors: [{ "status": 404, "title": "Not found", "message": "La planta ingresada no existe" }] })
 
     else {
       try {
