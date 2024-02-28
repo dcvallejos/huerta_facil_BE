@@ -101,9 +101,9 @@ router.put('/setPassword', checkSchema(setPasswordValidations), function(req, re
         }]
       })
     }
-    else res.send(invalid)
+    else res.status(400).send(invalid)
   }
-setPassword(req, res)
+else setPassword(req, res)
 })
 
 module.exports = router;

@@ -165,6 +165,7 @@ const userController = {
         // Cambiar por un SP o modificar sp updateUser para que devuelva los datos modificados
         const user = await sql`SELECT * FROM usuarios WHERE id_usuario = ${userData.id_usuario}`
         const token = generateToken(user[0])
+        res.clearCookie("jwt")
         res.cookie('jwt', token)
         return res.status(200).send({ type: 'response', attributes: { status: "200", title: "Transaction OK", message: 'Contraseña modificada correctamente' } })
       }
