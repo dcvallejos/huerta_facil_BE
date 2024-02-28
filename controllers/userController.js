@@ -1,7 +1,7 @@
 // llamar a la conexión 
 const sql = require('../connection.js')
 const bcrypt = require('bcrypt')
-const { generateToken, isLoggedIn } = require('../utils/token')
+const { generateToken } = require('../utils/token')
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
@@ -35,7 +35,7 @@ const userController = {
 
   'createUser': async function (req, res) {
 
-    const email = req.body.email,
+      const email = req.body.email,
       provincia = req.body.provincia,
       password = req.body.password,
       nombre = req.body.nombre;
@@ -47,7 +47,7 @@ const userController = {
       else {
         const hashPass = bcrypt.hashSync(password, 12)
         await sql`SELECT createUser(${email}, ${provincia}, ${hashPass}, ${nombre})`
-        return res.send({ type: 'response', attributes: { status: "200", title: "Transaction OK", message: 'Datos modificados correctamente' } })
+        return res.send({ type: 'response', attributes: { status: "200", title: "Transaction OK", message: 'Usuario creado exitosamente' } })
       }
     } catch {
       return res.status(500).send({ errors: [ { "status": 500,"title": "Internal error","message": "Error del servidor, contáctese con el administrador" }] })
@@ -56,16 +56,11 @@ const userController = {
 
   'getFavs': async function (req, res) {
     /*Retorna todas los nombres de las plantas favoritas del usuario logueado, precisa que el mismo este en sesion iniciada*/
-    const send = {}
-    var userId = req.params.id
-    var loggedUser = req.cookies.jwt
-    var extractedUserId = jwt.decode(loggedUser, process.env.SECRET)["id_usuario"]
-    const data = await sql`SELECT * FROM getFavs(${userId})`
+    var loggedUser = jwt.decode(req.cookies.jwt, process.env.SECRET)
+    var extractedUserId = loggedUser["id_usuario"]
+    const data = await sql`SELECT * FROM getFavs(${extractedUserId})`
 
-    // De esta forma solo el usuario con el id_usuario sesionado puede acceder a su propia informacion
-    if (userId != extractedUserId) return res.status(401).send({ errors: [{ "status": 401, "title": "Unauthorized", "message": "No puedes acceder a la informacion otro usuario" }] })
-
-    else if (data.length === 0) return res.status(404).send({ errors: [{ "status": 404, "title": "Not Found", "message": "El usuario no tiene favoritos" }] })
+    if (data.length === 0) return res.status(404).send({ errors: [{ "status": 404, "title": "Not Found", "message": "El usuario no tiene favoritos" }] })
 
     else {
       try {
@@ -77,17 +72,14 @@ const userController = {
   },
 
   'setFav': async function (req, res) {
-    const send = {}
-    var id_usuario = req.body.id_usuario
+
+    // Datos de usuario tomados desde el token
+    var loggedUser = jwt.decode(req.cookies.jwt, process.env.SECRET)
+    var id_usuario = loggedUser["id_usuario"]
     var id_especie = req.body.id_especie
-    var loggedUser = req.cookies.jwt
-    var extractedUserId = jwt.decode(loggedUser, process.env.SECRET)["id_usuario"]
     const plantTest = await sql`SELECT * FROM getById(${id_especie})`
 
-    // Al igual que getFavs, se chequea si el usuario actual en sesion esta buscando sus propios favoritos
-    if (id_usuario != extractedUserId) return res.status(401).send({ errors: [{ "status": 401, "title": "Unauthorized", "message": "No puedes acceder a la informacion otro usuario" }] })
-
-    else if (plantTest.length === 0) return res.status(404).send({ errors: [{ "status": 404, "title": "Not found", "message": "La planta ingresada no existe" }] })
+    if (plantTest.length === 0) return res.status(404).send({ errors: [{ "status": 404, "title": "Not found", "message": "La planta ingresada no existe" }] })
 
     else {
       try {
@@ -135,21 +127,17 @@ const userController = {
   'deleteUser': async function (req, res) {
     /*  Elimina un usuario pasado dentro del elemento del body "id_usuario" y activa un trigger 
         que elimina previamente todos sus favoritos */
-    var id_usuario = req.body.id_usuario
+
+    var loggedUser = jwt.decode(req.cookies.jwt, process.env.SECRET)
+    var id_usuario = loggedUser['id_usuario']
     var key_usuario = req.body.password
-    const userTest = await sql`SELECT checkUserById(${id_usuario})`
-    var loggedUser = req.cookies.jwt
-    var extractedUser = jwt.decode(loggedUser, process.env.SECRET)
-    
-    // Bloquea borrado de usuario ajeno al sesionado
-    if (id_usuario != extractedUser.id_usuario) return res.status(401).send({ errors: [{ "status": 401, "title": "Unauthorized", "message": "No puedes borrar a otro usuario" }] })
 
     // Verifica si la password hasheada coincide con la enviada
-    else if (!bcrypt.compareSync(key_usuario, extractedUser.pass)) return res.status(401).send({ errors: [{ "status": 401, "title": "Unauthorized", "message": "Contraseña incorrecta" }] })
+    if (!bcrypt.compareSync(key_usuario, loggedUser.pass)) return res.status(401).send({ errors: [{ "status": 401, "title": "Unauthorized", "message": "Contraseña incorrecta" }] })
 
     else {
       try {
-        await sql`SELECT deleteUser(${extractedUser.pass}, ${id_usuario})`
+        await sql`SELECT deleteUser(${loggedUser.pass}, ${id_usuario})`
         res.clearCookie("jwt")
         return res.status(200).send({ errors: [{ "status": 200, "title": "ransaction OK", "message": "Usuario correctamente eliminado" }] })
       }

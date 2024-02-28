@@ -14,7 +14,8 @@ const tokenFunctions = {
     jwt.verify(accessToken, process.env.SECRET, (err, user) => {
       if (err) {
         console.log(err)
-        return res.status(401).send({ errors: [{ status: "401", title: "unauthorized", message: 'Token expirado o incorrecto' }] })
+        res.clearCookie('jwt')
+        return res.status(401).send({ errors: [{ status: "401", title: "unauthorized", message: 'Token expirado o incorrecto. Logueese nuevamente' }] })
       } else {
         return next()
       }
