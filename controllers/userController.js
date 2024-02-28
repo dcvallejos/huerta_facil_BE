@@ -1,7 +1,7 @@
 // llamar a la conexión 
 const sql = require('../connection.js')
 const bcrypt = require('bcrypt')
-const { generateToken, isLoggedIn } = require('../utils/token')
+const { generateToken } = require('../utils/token')
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
@@ -47,7 +47,7 @@ const userController = {
       else {
         const hashPass = bcrypt.hashSync(password, 12)
         await sql`SELECT createUser(${email}, ${provincia}, ${hashPass}, ${nombre})`
-        return res.send({ type: 'response', attributes: { status: "200", title: "Transaction OK", message: 'Datos modificados correctamente' } })
+        return res.send({ type: 'response', attributes: { status: "200", title: "Transaction OK", message: 'Usuario creado exitosamente' } })
       }
     } catch {
       return res.status(500).send({ errors: [ { "status": 500,"title": "Internal error","message": "Error del servidor, contáctese con el administrador" }] })
