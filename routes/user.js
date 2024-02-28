@@ -84,9 +84,9 @@ router.put('/updateUser', checkSchema(updateUserValidations), function(req,res){
         }]
       })
     }
-    else res.send(invalid)
+    else res.status(400).send(invalid)
   }
-  updateUser(req, res)
+  else updateUser(req, res)
 })
 
 router.put('/setPassword', checkSchema(setPasswordValidations), function(req, res){

@@ -106,7 +106,7 @@ const userController = {
       const test = await sql`SELECT checkUserName(${email})`
       if (test.length >= 1) {
         res.send({
-          errors: [{ "status": 409, "title": "Conflict", "message": "Email en uso. Utilice otro" }]})
+          errors: [{ "status": 409, "title": "Conflict", "message": "El email ingresado es el mismo. Cámbielo para continuar" }]})
       } 
       else {
         await sql`SELECT updateUser(${userData.id_usuario}, ${email}, ${provincia}, NULL , ${nombre})`
@@ -114,6 +114,7 @@ const userController = {
         // Cambiar por un SP o modificar sp updateUser para que devuelva los datos modificados
         const user = await sql`SELECT * FROM getUserById(${userData.id_usuario})`
         const token = generateToken(user[0])
+        res.clearCookie.jwt
         res.cookie('jwt', token)
         res.send({ type: 'response', attributes: { status: "200", title: "Transaction OK", message: 'Datos modificados correctamente' } })
       }
