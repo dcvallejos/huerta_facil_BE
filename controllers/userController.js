@@ -155,7 +155,8 @@ const userController = {
     const userData = jwt.verify(cookieToken, process.env.SECRET)
 
     try {
-      if (!bcrypt.compareSync(passwordActual, userData.pass)) res.status(409).send({ errors: [{ "status": 409, "title": "Conflict","message": "Password incorrecto" }] })
+      if (!bcrypt.compareSync(passwordActual, userData.pass)) {
+        return res.status(409).send({ errors: [{ "status": 409, "title": "Conflict","message": "Password incorrecto" }] })}
       else {
         const hashPass = bcrypt.hashSync(nuevoPassword, 12)
         await sql`SELECT updateUser(${userData.id_usuario}, NULL, NULL, ${hashPass} , NULL)`
@@ -164,7 +165,7 @@ const userController = {
         const user = await sql`SELECT * FROM usuarios WHERE id_usuario = ${userData.id_usuario}`
         const token = generateToken(user[0])
         res.cookie('jwt', token)
-        res.status(200).send({ type: 'response', attributes: { status: "200", title: "Transaction OK", message: 'Contraseña modificada correctamente' } })
+        return res.status(200).send({ type: 'response', attributes: { status: "200", title: "Transaction OK", message: 'Contraseña modificada correctamente' } })
       }
     } catch (err) {
       console.log(err)
