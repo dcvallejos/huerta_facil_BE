@@ -1,8 +1,14 @@
 const express = require('express')
 const router = express.Router()
-const {filterBy, getPlantById, getCards, getProvincias, getClimas, getTiposPlanta } = require('../controllers/plantsController')
+const {recomendedPlants, filterBy, getPlantById, getCards, getProvincias, getClimas, getTiposPlanta } = require('../controllers/plantsController')
 const { validationResult } = require('express-validator')
 const validators = require('../utils/plantVal.js')
+const cookieParser = require('cookie-parser')
+router.use(cookieParser())
+const { validateToken } = require('../utils/token')
+
+
+router.get('/recomendedPlants', validateToken, recomendedPlants)
 
 router.get('/getPlantById/:id', validators, function(req, res){
 const invalid = validationResult(req)
