@@ -55,15 +55,7 @@ router.get('/logout', logout)
 
 router.use(validateToken)
 
-router.get('/getFavs/:id', idValidations, function (req, res) {
-  const invalid = validationResult(req)
-  console.log(invalid)
-  if (invalid.errors.length > 0) {
-    res.send(invalid)
-  } else {
-    getFavs(req, res)
-  }
-})
+router.get('/getFavs', getFavs)
 
 router.delete('/deleteUser', checkSchema(delUserValidations), function (req, res) {
   const invalid = validationResult(req)

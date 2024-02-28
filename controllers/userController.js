@@ -56,16 +56,11 @@ const userController = {
 
   'getFavs': async function (req, res) {
     /*Retorna todas los nombres de las plantas favoritas del usuario logueado, precisa que el mismo este en sesion iniciada*/
-    const send = {}
-    var userId = req.params.id
-    var loggedUser = req.cookies.jwt
-    var extractedUserId = jwt.decode(loggedUser, process.env.SECRET)["id_usuario"]
-    const data = await sql`SELECT * FROM getFavs(${userId})`
+    var loggedUser = jwt.decode(req.cookies.jwt, process.env.SECRET)
+    var extractedUserId = loggedUser["id_usuario"]
+    const data = await sql`SELECT * FROM getFavs(${extractedUserId})`
 
-    // De esta forma solo el usuario con el id_usuario sesionado puede acceder a su propia informacion
-    if (userId != extractedUserId) return res.status(401).send({ errors: [{ "status": 401, "title": "Unauthorized", "message": "No puedes acceder a la informacion otro usuario" }] })
-
-    else if (data.length === 0) return res.status(404).send({ errors: [{ "status": 404, "title": "Not Found", "message": "El usuario no tiene favoritos" }] })
+    if (data.length === 0) return res.status(404).send({ errors: [{ "status": 404, "title": "Not Found", "message": "El usuario no tiene favoritos" }] })
 
     else {
       try {
