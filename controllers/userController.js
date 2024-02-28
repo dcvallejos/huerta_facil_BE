@@ -35,7 +35,7 @@ const userController = {
 
   'createUser': async function (req, res) {
 
-    const email = req.body.email,
+      const email = req.body.email,
       provincia = req.body.provincia,
       password = req.body.password,
       nombre = req.body.nombre;
@@ -127,21 +127,17 @@ const userController = {
   'deleteUser': async function (req, res) {
     /*  Elimina un usuario pasado dentro del elemento del body "id_usuario" y activa un trigger 
         que elimina previamente todos sus favoritos */
-    var id_usuario = req.body.id_usuario
+
+    var loggedUser = jwt.decode(req.cookies.jwt, process.env.SECRET)
+    var id_usuario = loggedUser['id_usuario']
     var key_usuario = req.body.password
-    const userTest = await sql`SELECT checkUserById(${id_usuario})`
-    var loggedUser = req.cookies.jwt
-    var extractedUser = jwt.decode(loggedUser, process.env.SECRET)
-    
-    // Bloquea borrado de usuario ajeno al sesionado
-    if (id_usuario != extractedUser.id_usuario) return res.status(401).send({ errors: [{ "status": 401, "title": "Unauthorized", "message": "No puedes borrar a otro usuario" }] })
 
     // Verifica si la password hasheada coincide con la enviada
-    else if (!bcrypt.compareSync(key_usuario, extractedUser.pass)) return res.status(401).send({ errors: [{ "status": 401, "title": "Unauthorized", "message": "Contraseña incorrecta" }] })
+    if (!bcrypt.compareSync(key_usuario, loggedUser.pass)) return res.status(401).send({ errors: [{ "status": 401, "title": "Unauthorized", "message": "Contraseña incorrecta" }] })
 
     else {
       try {
-        await sql`SELECT deleteUser(${extractedUser.pass}, ${id_usuario})`
+        await sql`SELECT deleteUser(${loggedUser.pass}, ${id_usuario})`
         res.clearCookie("jwt")
         return res.status(200).send({ errors: [{ "status": 200, "title": "ransaction OK", "message": "Usuario correctamente eliminado" }] })
       }

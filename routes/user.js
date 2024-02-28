@@ -4,7 +4,6 @@ const validations = require('../utils/registerVal.js')
 const idValidations = require('../utils/plantVal.js')
 const favsValidations = require('../utils/favsVal.js')
 const loginValidations = require('../utils/loginVal.js')
-const delUserValidations = require('../utils/deleteUserVal.js')
 const updateUserValidations = require('../utils/updateUserVal.js')
 const setPasswordValidations = require('../utils/setPasswordVal.js')
 const { checkSchema, validationResult } = require('express-validator')
@@ -57,6 +56,8 @@ router.use(validateToken)
 
 router.get('/getFavs', getFavs)
 
+router.delete('/deleteUser', deleteUser)
+
 router.post('/setFav/', checkSchema(favsValidations), function (req, res) {
   const invalid = validationResult(req)
   if (!invalid.isEmpty()) {
@@ -67,17 +68,6 @@ router.post('/setFav/', checkSchema(favsValidations), function (req, res) {
   }
   else {
     setFav(req, res)
-  }
-})
-
-router.delete('/deleteUser', checkSchema(delUserValidations), function (req, res) {
-  const invalid = validationResult(req)
-  console.log(invalid)
-  if (!invalid.isEmpty()) {
-    res.send(invalid)
-  }
-  else {
-    deleteUser(req, res)
   }
 })
 
@@ -114,17 +104,6 @@ router.put('/setPassword', checkSchema(setPasswordValidations), function(req, re
     else res.send(invalid)
   }
 setPassword(req, res)
-})
-
-router.delete('/deleteUser', checkSchema(delUserValidations), function (req, res) {
-  const invalid = validationResult(req)
-  console.log(invalid)
-  if (!invalid.isEmpty()) {
-    res.send(invalid)
-  }
-  else {
-    deleteUser(req, res)
-  }
 })
 
 module.exports = router;
