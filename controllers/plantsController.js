@@ -129,7 +129,7 @@ const plantsController = {
     }
   },
 
-  'recomendedPlants': async function (req,res){
+  'recommendedPlants': async function (req,res){
     var page = parseInt(req.query.page) || 1
     var limit = parseInt(req.query.limit) || 15
     const cookieToken = req.cookies.jwt
