@@ -24,7 +24,7 @@ const userController = {
         res.cookie('jwt', token)
       }
       else {
-        send.errors = [{ status: "409", title: "Conflict", message: 'Contraseña incorrecta' }]
+        send.errors = [{ status: "409", title: "Conflict", message: 'Usuario o contraseña incorrectos' }]
       }
       return res.send(send)
     }

@@ -7,8 +7,8 @@ const plantsController = {
 
   'filterBy': async function (req, res) {
     // agregar lógica de paginado
-    const page = parseInt(req.query.page) || null
-    const limit = parseInt(req.query.limit) || null
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 15
     var clima = (req.query.clima) || null
     var provincia = (req.query.provincia) || null
     var tipoPlanta = (req.query.tipo_planta) || null
@@ -66,15 +66,15 @@ const plantsController = {
 
   'getCards': async function (req, res) {
     // agregar lógica de paginado
-    const page = parseInt(req.query.page) || null
-    const limit = parseInt(req.query.limit) || null
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 15
 
     const startIndex = (page - 1) * limit
     const endIndex = page * limit
 
     try {
       const totalPags = await sql`SELECT * FROM getCards()`
-      const data = await sql`SELECT * FROM getCards(offset_val => ${page}, limit_val => ${limit})`
+      const data = await sql`SELECT * FROM getCards(offset_val => ${startIndex}, limit_val => ${limit})`
       const paginado = {
         total: totalPags.length,
         items_per_page: limit,
@@ -84,10 +84,10 @@ const plantsController = {
       }
       if (startIndex > 0) {
         paginado.previous_page = page - 1
-        paginado.previous_url = (`${process.env.HOST_URL}/plants/filterBy?page=${page - 1}&limit=${limit}`)
+        paginado.previous_url = (`${process.env.HOST_URL}/plants/getCards?page=${page - 1}&limit=${limit}`)
         
       }
-      if (endIndex < totalPags.length - 1) {
+      if (endIndex < totalPags.length - 1  && paginado.total_pages > 1) {
         paginado.next_page = page + 1;
         paginado.next_url = `${process.env.HOST_URL}/plants/getCards?page=${page + 1}&limit=${limit}`
       }
@@ -154,12 +154,12 @@ const plantsController = {
 
       if (startIndex > 0){
         paginado.previous_page = page - 1
-        paginado.previous_url = (`${process.env.HOST_URL}/plants/recomendedPlants?page=${page - 1}&limit=${limit}`)
+        paginado.previous_url = (`${process.env.HOST_URL}/plants/recommendedPlants?page=${page - 1}&limit=${limit}`)
       }
         
       if (endIndex < totalPags.length - 1 && paginado.total_pages > 1) {
         paginado.next_page = page + 1;
-        paginado.next_url = (`${process.env.HOST_URL}/plants/recomendedPlants?page=${page + 1}&limit=${limit}`)
+        paginado.next_url = (`${process.env.HOST_URL}/plants/recommendedPlants?page=${page + 1}&limit=${limit}`)
       }
       res.send({ pagination: paginado, data: data })
     } catch (err) {
