@@ -7,7 +7,7 @@ const loginValidations = require('../utils/loginVal.js')
 const updateUserValidations = require('../utils/updateUserVal.js')
 const setPasswordValidations = require('../utils/setPasswordVal.js')
 const { checkSchema, validationResult } = require('express-validator')
-const { login, createUser, getFavs, setFav, updateUser, deleteUser, setPassword, logout } = require('../controllers/userController')
+const {login, createUser, getFavs, setFav, updateUser, deleteUser, setPassword, logout } = require('../controllers/userController')
 const cookieParser = require('cookie-parser')
 const { validateToken, isLoggedIn } = require('../utils/token')
 
@@ -84,9 +84,9 @@ router.put('/updateUser', checkSchema(updateUserValidations), function(req,res){
         }]
       })
     }
-    else res.send(invalid)
+    else res.status(400).send(invalid)
   }
-  updateUser(req, res)
+  else updateUser(req, res)
 })
 
 router.put('/setPassword', checkSchema(setPasswordValidations), function(req, res){
@@ -101,9 +101,9 @@ router.put('/setPassword', checkSchema(setPasswordValidations), function(req, re
         }]
       })
     }
-    else res.send(invalid)
+    else res.status(400).send(invalid)
   }
-setPassword(req, res)
+else setPassword(req, res)
 })
 
 module.exports = router;

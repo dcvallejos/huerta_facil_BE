@@ -1,8 +1,10 @@
 const { escape } = require('mysql2')
 const sql = require('../connection.js')
+const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
 const plantsController = {
+
   'filterBy': async function (req, res) {
     // agregar lógica de paginado
     const page = parseInt(req.query.page) || null
@@ -19,14 +21,13 @@ const plantsController = {
       provincia === "null" ? provincia = null : decodeURIComponent(provincia)
       clima === "null" ? clima = null : decodeURIComponent(clima)
 
-      console.log(clima)
       const totalPags = await sql`SELECT * FROM filterBy(provincia_param => ${provincia}, clima_param => ${clima}, tipo_planta_param =>${tipoPlanta})`
-      const data = await sql`SELECT * FROM filterBy(offset_param => ${page}, limit_param => ${limit}, provincia_param => ${provincia}, clima_param => ${clima}, tipo_planta_param =>${tipoPlanta})`
+      const data = await sql`SELECT * FROM filterBy(offset_param => ${startIndex}, limit_param => ${limit}, provincia_param => ${provincia}, clima_param => ${clima}, tipo_planta_param =>${tipoPlanta})`
       const paginado = {
         total: totalPags.length,
-        items_per_page: limit,
+        items_per_page: limit == null?  'all' : limit,
         current_page: page,
-        total_pages: Math.ceil(totalPags.length / limit)
+        total_pages:  limit == null ? 1 : Math.ceil(totalPags.length / limit)
 
       }
 
@@ -35,7 +36,7 @@ const plantsController = {
         paginado.previous_url = (`${process.env.HOST_URL}/plants/filterBy?page=${page - 1}&limit=${limit}&clima=${encodeURIComponent(clima)}&provincia=${encodeURIComponent(provincia)}&tipoPlanta=${encodeURIComponent(tipoPlanta)}`)
       }
         
-      if (endIndex < totalPags.length - 1) {
+      if (endIndex < totalPags.length - 1 && paginado.total_pages > 1) {
         paginado.next_page = page + 1;
         paginado.next_url = (`${process.env.HOST_URL}/plants/filterBy?page=${page + 1}&limit=${limit}&clima=${encodeURIComponent(clima)}&provincia=${encodeURIComponent(provincia)}&tipoPlanta=${encodeURIComponent(tipoPlanta)}`)
       }
@@ -126,6 +127,46 @@ const plantsController = {
     } catch {
       return res.status(500).send({ errors: [{ "status": 500, "title": "Internal error", "message": "Error del servidor, contáctese con el administrador" }] })
     }
+  },
+
+  'recommendedPlants': async function (req,res){
+    var page = parseInt(req.query.page) || 1
+    var limit = parseInt(req.query.limit) || 15
+    const cookieToken = req.cookies.jwt
+    const userData = jwt.verify(cookieToken, process.env.SECRET)
+    var provinciaData = await sql `SELECT * FROM getUserById(${userData.id_usuario}) `
+    var provincia = provinciaData[0].provincia 
+
+    console.log(page)
+    
+    const startIndex = (page - 1) * limit
+    const endIndex = page * limit
+
+    try {
+      const totalPags = await sql`SELECT * FROM filterBy(provincia_param => ${provincia})`
+      const data = await sql`SELECT id_especie, nombre, img, climas, tipo_planta, toxica_para_mascotas FROM filterBy(offset_param => ${startIndex}, limit_param => ${limit}, provincia_param => ${provincia})`
+      const paginado = {
+        total: totalPags.length,
+        items_per_page: limit,
+        current_page: page,
+        total_pages: Math.ceil(totalPags.length / limit)
+      }
+
+      if (startIndex > 0){
+        paginado.previous_page = page - 1
+        paginado.previous_url = (`${process.env.HOST_URL}/plants/recomendedPlants?page=${page - 1}&limit=${limit}`)
+      }
+        
+      if (endIndex < totalPags.length - 1 && paginado.total_pages > 1) {
+        paginado.next_page = page + 1;
+        paginado.next_url = (`${process.env.HOST_URL}/plants/recomendedPlants?page=${page + 1}&limit=${limit}`)
+      }
+      res.send({ pagination: paginado, data: data })
+    } catch (err) {
+      console.log(err)
+      res.status(500).send({ errors: [ {"status": 500, "title": "Internal error", "message": "Error del servidor, contáctese con el administrador" }]})
+    }
+
   }
 }
 
