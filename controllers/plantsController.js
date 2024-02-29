@@ -74,7 +74,7 @@ const plantsController = {
 
     try {
       const totalPags = await sql`SELECT * FROM getCards()`
-      const data = await sql`SELECT * FROM getCards(offset_val => ${page}, limit_val => ${limit})`
+      const data = await sql`SELECT * FROM getCards(offset_val => ${startIndex}, limit_val => ${limit})`
       const paginado = {
         total: totalPags.length,
         items_per_page: limit,
@@ -84,10 +84,10 @@ const plantsController = {
       }
       if (startIndex > 0) {
         paginado.previous_page = page - 1
-        paginado.previous_url = (`${process.env.HOST_URL}/plants/filterBy?page=${page - 1}&limit=${limit}`)
+        paginado.previous_url = (`${process.env.HOST_URL}/plants/getCards?page=${page - 1}&limit=${limit}`)
         
       }
-      if (endIndex < totalPags.length - 1) {
+      if (endIndex < totalPags.length - 1  && paginado.total_pages > 1) {
         paginado.next_page = page + 1;
         paginado.next_url = `${process.env.HOST_URL}/plants/getCards?page=${page + 1}&limit=${limit}`
       }
