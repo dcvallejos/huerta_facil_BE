@@ -9,7 +9,7 @@ router.use(cookieParser())
 const { validateToken } = require('../utils/token')
 
 
-router.get('/recommendedPlants', validateToken, recommendedPlants)
+router.get('/recommendedPlants', validateToken, recommendedPlants)  // Precisa que el usuario esté logueado
 
 router.get('/getPlantById/:id', validators, function(req, res){
 const invalid = validationResult(req)
