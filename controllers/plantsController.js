@@ -172,7 +172,8 @@ const plantsController = {
   'getCardsByName': async function (req, res) {
     // Trae un json con todas las especies que inicien con los caracteres ingresados en el buscador. Si tiene un numero en la cadena, se bloquea el envio mediante el validador
     try {
-      capWord = req.charAt(0).toUpperCase() + req.slice(1)
+      capWord = req.charAt(0).toUpperCase() + req.slice(1).toLowerCase()
+      console.log(capWord)
       var getCardList = await sql `SELECT * FROM getCards(limit_val => 100) WHERE nombre LIKE ${capWord} || '%'`
       var totalElements = Object.keys(getCardList).length
 
