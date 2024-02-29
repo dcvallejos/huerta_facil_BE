@@ -25,17 +25,17 @@ const plantsController = {
       const data = await sql`SELECT * FROM filterBy(offset_param => ${startIndex}, limit_param => ${limit}, provincia_param => ${provincia}, clima_param => ${clima}, tipo_planta_param =>${tipoPlanta})`
       const paginado = {
         total: totalPags.length,
-        items_per_page: limit == null?  'all' : limit,
+        items_per_page: limit == null ? 'all' : limit,
         current_page: page,
-        total_pages:  limit == null ? 1 : Math.ceil(totalPags.length / limit)
+        total_pages: limit == null ? 1 : Math.ceil(totalPags.length / limit)
 
       }
 
-      if (startIndex > 0){
+      if (startIndex > 0) {
         paginado.previous_page = page - 1
         paginado.previous_url = (`${process.env.HOST_URL}/plants/filterBy?page=${page - 1}&limit=${limit}&clima=${encodeURIComponent(clima)}&provincia=${encodeURIComponent(provincia)}&tipoPlanta=${encodeURIComponent(tipoPlanta)}`)
       }
-        
+
       if (endIndex < totalPags.length - 1 && paginado.total_pages > 1) {
         paginado.next_page = page + 1;
         paginado.next_url = (`${process.env.HOST_URL}/plants/filterBy?page=${page + 1}&limit=${limit}&clima=${encodeURIComponent(clima)}&provincia=${encodeURIComponent(provincia)}&tipoPlanta=${encodeURIComponent(tipoPlanta)}`)
@@ -43,23 +43,23 @@ const plantsController = {
       res.send({ pagination: paginado, data: data })
     } catch (err) {
       console.log(err)
-      res.status(500).send({ errors: [ {"status": 500, "title": "Internal error", "message": "Error del servidor, contáctese con el administrador" }]})
+      res.status(500).send({ errors: [{ "status": 500, "title": "Internal error", "message": "Error del servidor, contáctese con el administrador" }] })
     }
   },
-  
+
   'getPlantById': async function (req, res) {
     const id = req.params.id
 
     try {
       const data = await sql`SELECT * FROM getByID(${id})`
 
-      if (data.length === 0)  res.status(404).send({"errors": [{"status": 404,"title": "Not found", "message": "No existe esa planta" }] })
+      if (data.length === 0) res.status(404).send({ "errors": [{ "status": 404, "title": "Not found", "message": "No existe esa planta" }] })
 
-      else res.send({"data": data })
+      else res.send({ "data": data })
 
-    } 
+    }
     catch {
-      res.status(500).send({ errors: [ { "status": 500, "title": "Internal error", "message": "Error del servidor, contáctese con el administrador" }]})
+      res.status(500).send({ errors: [{ "status": 500, "title": "Internal error", "message": "Error del servidor, contáctese con el administrador" }] })
     }
 
   },
@@ -85,9 +85,9 @@ const plantsController = {
       if (startIndex > 0) {
         paginado.previous_page = page - 1
         paginado.previous_url = (`${process.env.HOST_URL}/plants/getCards?page=${page - 1}&limit=${limit}`)
-        
+
       }
-      if (endIndex < totalPags.length - 1  && paginado.total_pages > 1) {
+      if (endIndex < totalPags.length - 1 && paginado.total_pages > 1) {
         paginado.next_page = page + 1;
         paginado.next_url = `${process.env.HOST_URL}/plants/getCards?page=${page + 1}&limit=${limit}`
       }
@@ -95,7 +95,7 @@ const plantsController = {
       res.send({ pagination: paginado, data: data })
     } catch (err) {
       console.log(err)
-      res.status(500).send({ errors: [ {"status": 500,"title": "Internal error", "message": "Error del servidor, contáctese con el administrador" }] })
+      res.status(500).send({ errors: [{ "status": 500, "title": "Internal error", "message": "Error del servidor, contáctese con el administrador" }] })
     }
   },
 
@@ -129,16 +129,16 @@ const plantsController = {
     }
   },
 
-  'recommendedPlants': async function (req,res){
+  'recommendedPlants': async function (req, res) {
     var page = parseInt(req.query.page) || 1
     var limit = parseInt(req.query.limit) || 15
     const cookieToken = req.cookies.jwt
     const userData = jwt.verify(cookieToken, process.env.SECRET)
-    var provinciaData = await sql `SELECT * FROM getUserById(${userData.id_usuario}) `
-    var provincia = provinciaData[0].provincia 
+    var provinciaData = await sql`SELECT * FROM getUserById(${userData.id_usuario}) `
+    var provincia = provinciaData[0].provincia
 
     console.log(page)
-    
+
     const startIndex = (page - 1) * limit
     const endIndex = page * limit
 
@@ -152,11 +152,11 @@ const plantsController = {
         total_pages: Math.ceil(totalPags.length / limit)
       }
 
-      if (startIndex > 0){
+      if (startIndex > 0) {
         paginado.previous_page = page - 1
         paginado.previous_url = (`${process.env.HOST_URL}/plants/recommendedPlants?page=${page - 1}&limit=${limit}`)
       }
-        
+
       if (endIndex < totalPags.length - 1 && paginado.total_pages > 1) {
         paginado.next_page = page + 1;
         paginado.next_url = (`${process.env.HOST_URL}/plants/recommendedPlants?page=${page + 1}&limit=${limit}`)
@@ -164,9 +164,25 @@ const plantsController = {
       res.send({ pagination: paginado, data: data })
     } catch (err) {
       console.log(err)
-      res.status(500).send({ errors: [ {"status": 500, "title": "Internal error", "message": "Error del servidor, contáctese con el administrador" }]})
+      res.status(500).send({ errors: [{ "status": 500, "title": "Internal error", "message": "Error del servidor, contáctese con el administrador" }] })
     }
 
+  },
+
+  'getCardsByName': async function (req, res) {
+    // Trae un json con todas las especies que inicien con los caracteres ingresados en el buscador. Si tiene un numero en la cadena, se bloquea el envio mediante el validador
+    try {
+      capWord = req.charAt(0).toUpperCase() + req.slice(1)
+      var getCardList = await sql `SELECT * FROM getCards(limit_val => 100) WHERE nombre LIKE ${capWord} || '%'`
+      var totalElements = Object.keys(getCardList).length
+
+      if(totalElements == 0) return res.status(404).send({errors: [{"status" : 404, "title" : "Not Found", "message" : "No se ha encontrado ninguna especie que tenga ese nombre"}]}) 
+
+      else return res.status(200).send({data: getCardList[0]})
+    } 
+    catch (error) {
+      return res.status(500).send({errors: [{"status" : 500, "title" : "Internal error", "message" : "Error del servidor, comuníquese con un administrador"}]})        
+    }
   }
 }
 
