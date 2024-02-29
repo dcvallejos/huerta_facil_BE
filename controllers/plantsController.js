@@ -7,8 +7,8 @@ const plantsController = {
 
   'filterBy': async function (req, res) {
     // agregar lógica de paginado
-    const page = parseInt(req.query.page) || null
-    const limit = parseInt(req.query.limit) || null
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 15
     var clima = (req.query.clima) || null
     var provincia = (req.query.provincia) || null
     var tipoPlanta = (req.query.tipo_planta) || null
@@ -66,8 +66,8 @@ const plantsController = {
 
   'getCards': async function (req, res) {
     // agregar lógica de paginado
-    const page = parseInt(req.query.page) || null
-    const limit = parseInt(req.query.limit) || null
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 15
 
     const startIndex = (page - 1) * limit
     const endIndex = page * limit
