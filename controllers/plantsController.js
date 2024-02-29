@@ -194,7 +194,7 @@ const plantsController = {
 
       if(totalElements == 0) return res.status(404).send({errors: [{"status" : 404, "title" : "Not Found", "message" : "No se ha encontrado ninguna especie que tenga ese nombre"}]}) 
 
-      else return res.status(200).send({data: getCardList[0]})
+      else return res.status(200).send({data: getCardList})
     } 
     catch (error) {
       return res.status(500).send({errors: [{"status" : 500, "title" : "Internal error", "message" : "Error del servidor, comuníquese con un administrador"}]})        
