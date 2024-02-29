@@ -154,12 +154,12 @@ const plantsController = {
 
       if (startIndex > 0){
         paginado.previous_page = page - 1
-        paginado.previous_url = (`${process.env.HOST_URL}/plants/recomendedPlants?page=${page - 1}&limit=${limit}`)
+        paginado.previous_url = (`${process.env.HOST_URL}/plants/recommendedPlants?page=${page - 1}&limit=${limit}`)
       }
         
       if (endIndex < totalPags.length - 1 && paginado.total_pages > 1) {
         paginado.next_page = page + 1;
-        paginado.next_url = (`${process.env.HOST_URL}/plants/recomendedPlants?page=${page + 1}&limit=${limit}`)
+        paginado.next_url = (`${process.env.HOST_URL}/plants/recommendedPlants?page=${page + 1}&limit=${limit}`)
       }
       res.send({ pagination: paginado, data: data })
     } catch (err) {
