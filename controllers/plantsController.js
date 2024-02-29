@@ -22,7 +22,7 @@ const plantsController = {
       clima === "null" ? clima = null : decodeURIComponent(clima)
 
       const totalPags = await sql`SELECT * FROM filterBy(provincia_param => ${provincia}, clima_param => ${clima}, tipo_planta_param =>${tipoPlanta})`
-      const data = await sql`SELECT * FROM filterBy(offset_param => ${page}, limit_param => ${limit}, provincia_param => ${provincia}, clima_param => ${clima}, tipo_planta_param =>${tipoPlanta})`
+      const data = await sql`SELECT * FROM filterBy(offset_param => ${startIndex}, limit_param => ${limit}, provincia_param => ${provincia}, clima_param => ${clima}, tipo_planta_param =>${tipoPlanta})`
       const paginado = {
         total: totalPags.length,
         items_per_page: limit == null?  'all' : limit,
@@ -130,19 +130,21 @@ const plantsController = {
   },
 
   'recomendedPlants': async function (req,res){
-    const page = parseInt(req.query.page) || 1
-    const limit = parseInt(req.query.limit) || 15
+    var page = parseInt(req.query.page) || 1
+    var limit = parseInt(req.query.limit) || 15
     const cookieToken = req.cookies.jwt
     const userData = jwt.verify(cookieToken, process.env.SECRET)
     var provinciaData = await sql `SELECT * FROM getUserById(${userData.id_usuario}) `
     var provincia = provinciaData[0].provincia 
+
+    console.log(page)
     
     const startIndex = (page - 1) * limit
     const endIndex = page * limit
 
     try {
       const totalPags = await sql`SELECT * FROM filterBy(provincia_param => ${provincia})`
-      const data = await sql`SELECT id_especie, nombre, img, climas, tipo_planta, toxica_para_mascotas FROM filterBy(offset_param => ${page}, limit_param => ${limit}, provincia_param => ${provincia})`
+      const data = await sql`SELECT id_especie, nombre, img, climas, tipo_planta, toxica_para_mascotas FROM filterBy(offset_param => ${startIndex}, limit_param => ${limit}, provincia_param => ${provincia})`
       const paginado = {
         total: totalPags.length,
         items_per_page: limit,
@@ -152,12 +154,12 @@ const plantsController = {
 
       if (startIndex > 0){
         paginado.previous_page = page - 1
-        paginado.previous_url = (`${process.env.HOST_URL}/user/recomendedPlants?page=${page - 1}&limit=${limit}`)
+        paginado.previous_url = (`${process.env.HOST_URL}/plants/recomendedPlants?page=${page - 1}&limit=${limit}`)
       }
         
-      if (endIndex < totalPags.length - 1) {
+      if (endIndex < totalPags.length - 1 && paginado.total_pages > 1) {
         paginado.next_page = page + 1;
-        paginado.next_url = (`${process.env.HOST_URL}/user/recomendedPlants?page=${page + 1}&limit=${limit}`)
+        paginado.next_url = (`${process.env.HOST_URL}/plants/recomendedPlants?page=${page + 1}&limit=${limit}`)
       }
       res.send({ pagination: paginado, data: data })
     } catch (err) {
