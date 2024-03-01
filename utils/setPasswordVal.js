@@ -1,5 +1,5 @@
 const {checkBody, checkPass} = require('./customs.js')
-
+// Validaciones para password
 const validations = {
 passwordActual: {
   notEmpty: {
