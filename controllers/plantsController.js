@@ -6,21 +6,29 @@ require('dotenv').config()
 const plantsController = {
 
   'filterBy': async function (req, res) {
-    // agregar lógica de paginado
+    // Filtra dinamicamente por parametros url opcionales de clima, provincia y tipo_planta. 
+    // Se puede especificar cuantos items se quiere por pagina agregando el parametro limit_param
+    
     const page = parseInt(req.query.page) || 1
     const limit = parseInt(req.query.limit) || 15
     var clima = (req.query.clima) || null
     var provincia = (req.query.provincia) || null
     var tipoPlanta = (req.query.tipo_planta) || null
-
+    
+    // Lógica de paginado
+    // Evita poner un previous_url si se encuentra en la 1er pag y un next_url si se encuentra en la ultima o es solo una pagina
+    
     const startIndex = (page - 1) * limit
     const endIndex = page * limit
 
     try {
+
+      // Evita parametros null pasados como string y decodifica los parametros para los links de paginas en formato URI
       tipoPlanta === "null" ? tipoPlanta = null : decodeURIComponent(tipoPlanta)
       provincia === "null" ? provincia = null : decodeURIComponent(provincia)
       clima === "null" ? clima = null : decodeURIComponent(clima)
 
+      
       const totalPags = await sql`SELECT * FROM filterBy(provincia_param => ${provincia}, clima_param => ${clima}, tipo_planta_param =>${tipoPlanta})`
       const data = await sql`SELECT * FROM filterBy(offset_param => ${startIndex}, limit_param => ${limit}, provincia_param => ${provincia}, clima_param => ${clima}, tipo_planta_param =>${tipoPlanta})`
       const paginado = {
@@ -30,6 +38,8 @@ const plantsController = {
         total_pages: limit == null ? 1 : Math.ceil(totalPags.length / limit)
 
       }
+
+      // Todos los parametros de busqueda que fueron incluidos en el filtro son codificados antes de ser enviados para poder ser accedidos
 
       if (startIndex > 0) {
         paginado.previous_page = page - 1
@@ -52,26 +62,25 @@ const plantsController = {
 
     try {
       const data = await sql`SELECT * FROM getByID(${id})`
-
       if (data.length === 0) res.status(404).send({ "errors": [{ "status": 404, "title": "Not found", "message": "No existe esa planta" }] })
 
       else res.send({ "data": data })
-
     }
     catch {
       res.status(500).send({ errors: [{ "status": 500, "title": "Internal error", "message": "Error del servidor, contáctese con el administrador" }] })
     }
-
   },
 
   'getCards': async function (req, res) {
-    // agregar lógica de paginado
+    // Retorna los datos de todas las plantas para confeccionar tarjetas
+    // Campos que retorna: id_especie, nombre, imagen_path, provincias donde se planta, climas ideales, tipo de planta y si es toxica o no para mascotas
     const page = parseInt(req.query.page) || 1
     const limit = parseInt(req.query.limit) || 15
-
+    
     const startIndex = (page - 1) * limit
     const endIndex = page * limit
-
+    
+    // Lógica de paginado
     try {
       const totalPags = await sql`SELECT * FROM getCards()`
       const data = await sql`SELECT * FROM getCards(offset_val => ${startIndex}, limit_val => ${limit})`
@@ -80,8 +89,10 @@ const plantsController = {
         items_per_page: limit,
         current_page: page,
         total_pages: Math.ceil(totalPags.length / limit)
-
+        
       }
+
+      // Evita poner un previous_url si se encuentra en la 1er pag y un next_url si se encuentra en la ultima o es solo una pagina
       if (startIndex > 0) {
         paginado.previous_page = page - 1
         paginado.previous_url = (`${process.env.HOST_URL}/plants/getCards?page=${page - 1}&limit=${limit}`)
@@ -130,6 +141,8 @@ const plantsController = {
   },
 
   'recommendedPlants': async function (req, res) {
+    // Este endpoint solo puede ser accedido por un usuario logueado. 
+    // Retorna un filtro prediseñado para que indique las tarjetas de plantas recomendadas por la provincia de residencia
     var page = parseInt(req.query.page) || 1
     var limit = parseInt(req.query.limit) || 15
     const cookieToken = req.cookies.jwt
@@ -139,6 +152,7 @@ const plantsController = {
 
     console.log(page)
 
+    // Lógica de paginado
     const startIndex = (page - 1) * limit
     const endIndex = page * limit
 
@@ -151,8 +165,9 @@ const plantsController = {
         current_page: page,
         total_pages: Math.ceil(totalPags.length / limit)
       }
-
-      if (startIndex > 0) {
+      
+    // Evita poner un previous_url si se encuentra en la 1er pag y un next_url si se encuentra en la ultima o es solo una pagina
+    if (startIndex > 0) {
         paginado.previous_page = page - 1
         paginado.previous_url = (`${process.env.HOST_URL}/plants/recommendedPlants?page=${page - 1}&limit=${limit}`)
       }
@@ -170,7 +185,7 @@ const plantsController = {
   },
 
   'getCardsByName': async function (req, res) {
-    // Trae un json con todas las especies que inicien con los caracteres ingresados en el buscador. Si tiene un numero en la cadena, se bloquea el envio mediante el validador
+    // Retorna todas las cards de especies que inicien con los caracteres ingresados en el buscador (por params). Si tiene un numero en la cadena, se bloquea el envio mediante el validador
     try {
       capWord = req.charAt(0).toUpperCase() + req.slice(1).toLowerCase()
       console.log(capWord)
@@ -179,7 +194,7 @@ const plantsController = {
 
       if(totalElements == 0) return res.status(404).send({errors: [{"status" : 404, "title" : "Not Found", "message" : "No se ha encontrado ninguna especie que tenga ese nombre"}]}) 
 
-      else return res.status(200).send({data: getCardList[0]})
+      else return res.status(200).send({data: getCardList})
     } 
     catch (error) {
       return res.status(500).send({errors: [{"status" : 500, "title" : "Internal error", "message" : "Error del servidor, comuníquese con un administrador"}]})        

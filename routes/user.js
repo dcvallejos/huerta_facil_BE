@@ -46,11 +46,12 @@ router.post('/createUser', isLoggedIn, checkSchema(validations), function (req, 
   }
   else createUser(req, res)
 })
+// isLoggedIn verifica si el usuario esta logueado al querer acceder a dichas funciones. En caso positivo se bloquean.
 
 router.get('/logout', logout)
 
 
-// A partir de aqui todos los endpoints estan sujetos bajo validacion JWT
+// A partir de aqui todos los endpoints estan sujetos bajo validacion JWT. Mandatorio que exista una sesión correcta
 
 router.use(validateToken)
 

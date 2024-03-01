@@ -8,6 +8,10 @@ require('dotenv').config()
 const userController = {
 
   'login': async function (req, res) {
+    // Metodo GET
+    // Chequea los elementos en el body del mensaje ("usuario", "password") y compara primero el usuario y luego el hash del password guardado en la BDD.
+    // Genera un token y la cookie 'jwt', que representa la session, con un vencimiento de 30'
+
     const usuario = req.body.usuario
     const password = req.body.password
     const send = {}
@@ -34,20 +38,25 @@ const userController = {
   },
 
   'createUser': async function (req, res) {
+    // Método POST
+    // Crea un usuario mediante los elementos del body del mensaje {"email", "provincia", "password", "nombre"}
+    // No permite un email repetido y asigna automaticamente un id de usuario
+    
+    const email = req.body.email,
+    provincia = req.body.provincia,
+    password = req.body.password,
+    nombre = req.body.nombre;
 
-      const email = req.body.email,
-      provincia = req.body.provincia,
-      password = req.body.password,
-      nombre = req.body.nombre;
     try {
       const test = await sql`SELECT checkUserName(${email})`
       if (test.length >= 1) {
         return res.send({ errors: [{  "status": 409, "title": "Conflict", "message": "Email en uso. Utilice otro" }] })
       } 
       else {
+        // Proceso de hasheo de password mediante metodo salt
         const hashPass = bcrypt.hashSync(password, 12)
         await sql`SELECT createUser(${email}, ${provincia}, ${hashPass}, ${nombre})`
-        return res.send({ type: 'response', attributes: { status: "200", title: "Transaction OK", message: 'Usuario creado exitosamente' } })
+        return res.send({ type: 'response', attributes: { status: "200", title: "Transaction OK", message: 'Usuario creado exitosamente, ya puede iniciar sesión' } })
       }
     } catch {
       return res.status(500).send({ errors: [ { "status": 500,"title": "Internal error","message": "Error del servidor, contáctese con el administrador" }] })
@@ -55,7 +64,9 @@ const userController = {
   },
 
   'getFavs': async function (req, res) {
-    /*Retorna todas los nombres de las plantas favoritas del usuario logueado, precisa que el mismo este en sesion iniciada*/
+    // Retorna todas los nombres de las plantas favoritas del usuario logueado, precisa que el mismo este en sesion iniciada
+    // Se extraen las credenciales del usuario en sesión mediante decodificación del token de la cookie
+
     var loggedUser = jwt.decode(req.cookies.jwt, process.env.SECRET)
     var extractedUserId = loggedUser["id_usuario"]
     const data = await sql`SELECT * FROM getFavs(${extractedUserId})`
@@ -71,9 +82,11 @@ const userController = {
     }
   },
 
-  'setFav': async function (req, res) {
+  'setFav': async function (req, res) {    
+    // Método POST
+    // Agrega la id_planta indicada en el body al listado de favoritos del usuario o bien quita si la id_especie indicada ya existe en el listado del mismo
+    // Datos de usuario tomados desde la cookie
 
-    // Datos de usuario tomados desde el token
     var loggedUser = jwt.decode(req.cookies.jwt, process.env.SECRET)
     var id_usuario = loggedUser["id_usuario"]
     var id_especie = req.body.id_especie
@@ -95,6 +108,10 @@ const userController = {
   },
 
   'updateUser': async function (req, res) {
+    // Método SET
+    // Actualiza los datos del usuario mediante el id_usuario tomado de la cookie del usuario sesionado
+    // Se puede modificar segun los campos {"email","provincia","nombre"}
+    
     const cookieToken = req.cookies.jwt
     const userData = jwt.verify(cookieToken, process.env.SECRET)
 
@@ -102,21 +119,27 @@ const userController = {
     const provincia = req.body.provincia || null
     const nombre = req.body.nombre || null
 
+    // En el caso de que ya exista un correo en la BDD con el mismo nombre, o bien se lo quiera cambiar por el mismo, el endpoint envia un mensaje de error
     try {
       const test = await sql`SELECT checkUserName(${email})`
       if (test.length >= 1) {
         res.send({
-          errors: [{ "status": 409, "title": "Conflict", "message": "El email ingresado es el mismo. Cámbielo para continuar" }]})
+          errors: [{ "status": 409, "title": "Conflict", "message": "El email ingresado es el mismo o bien ya existe en la base de datos. Cámbielo para continuar" }]})
       } 
       else {
         await sql`SELECT updateUser(${userData.id_usuario}, ${email}, ${provincia}, NULL , ${nombre})`
 
-        // Cambiar por un SP o modificar sp updateUser para que devuelva los datos modificados
+        // Obtiene datos actualizados del usuario, elimina la cookie actual y se crea una nueva para mantener la sesión iniciada
         const user = await sql`SELECT * FROM getUserById(${userData.id_usuario})`
         const token = generateToken(user[0])
         res.clearCookie.jwt
         res.cookie('jwt', token)
-        res.send({ type: 'response', attributes: { status: "200", title: "Transaction OK", message: 'Datos modificados correctamente' } })
+
+        // Envío de response junto a datos actualizados del usuario
+        res.status(200).send({  type: 'response', 
+                                attributes: { status: "200", title: "Transaction OK", message: 'Datos modificados correctamente' },
+                                updated_data: { email: `${user[0].usuario}`, province: `${user[0].provincia }`, name: `${user[0].nombre}`}
+                              })
       }
     } catch (err) {
       console.log(err)
@@ -140,7 +163,7 @@ const userController = {
       try {
         await sql`SELECT deleteUser(${loggedUser.pass}, ${id_usuario})`
         res.clearCookie("jwt")
-        return res.status(200).send({ errors: [{ "status": 200, "title": "ransaction OK", "message": "Usuario correctamente eliminado" }] })
+        return res.status(200).send({ response: [{ "status": 200, "title": "ransaction OK", "message": "Usuario correctamente eliminado" }] })
       }
       catch (error){
         console.log(error.message)
@@ -150,19 +173,25 @@ const userController = {
   },
 
   'setPassword': async function (req, res) {
+    // Solo permite modificar la contraseña del usuario en sesión, tomando la id_usuario de la cookie.
+    // Solo puede ser modificada si en el cuerpo del mensaje se escriben correctamente los campos {"passwordActual", "nuevoPassword", "passwordRepetido"}
+
     const passwordActual = req.body.passwordActual
     const nuevoPassword = req.body.nuevoPassword
     const cookieToken = req.cookies.jwt
     const userData = jwt.verify(cookieToken, process.env.SECRET)
 
     try {
+      // Compara ambas contraseñas, la ingresada con la hasheada en la BDD
       if (!bcrypt.compareSync(passwordActual, userData.pass)) {
         return res.status(409).send({ errors: [{ "status": 409, "title": "Conflict","message": "Password incorrecto" }] })}
+
       else {
+        // Si la comparacion es exitosa, realiza un nuevo hasheo de la contraseña ingresada y la modifica en la BDD
         const hashPass = bcrypt.hashSync(nuevoPassword, 12)
         await sql`SELECT updateUser(${userData.id_usuario}, NULL, NULL, ${hashPass} , NULL)`
-
-        // Cambiar por un SP o modificar sp updateUser para que devuelva los datos modificados
+        
+        // Para asegurar establidad se elimina la cookie actual y se genera una nueva con los datos de usuario actualizados
         const user = await sql`SELECT * FROM usuarios WHERE id_usuario = ${userData.id_usuario}`
         const token = generateToken(user[0])
         res.clearCookie("jwt")
