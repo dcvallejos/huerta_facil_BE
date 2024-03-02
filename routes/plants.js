@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const {getCardsByName,recommendedPlants, filterBy, getPlantById, getCards, getProvincias, getClimas, getTiposPlanta } = require('../controllers/plantsController')
+const {getCardsByName,recommendedPlants, filterBy, getPlantById, getCards, getSelectors } = require('../controllers/plantsController')
 const { validationResult } = require('express-validator')
 const validators = require('../utils/plantVal.js')
 const nameValidators = require('../utils/plantNameVal.js')
@@ -20,11 +20,8 @@ if(invalid.errors.length > 0){
   getPlantById(req, res)
 }
 })
-router.get('/getProvincias', getProvincias)
 
-router.get('/getClimas', getClimas)
-
-router.get('/getTiposPlanta', getTiposPlanta)
+router.get('/getSelectors', getSelectors)
 
 router.get('/getCards', getCards)
 
