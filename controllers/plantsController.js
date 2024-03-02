@@ -9,11 +9,12 @@ const plantsController = {
     // Filtra dinamicamente por parametros url opcionales de clima, provincia y tipo_planta. 
     // Se puede especificar cuantos items se quiere por pagina agregando el parametro limit_param
     
-    const page = parseInt(req.query.page) || 1
-    const limit = parseInt(req.query.limit) || 15
+    var page = parseInt(req.query.page) || 1
+    var limit = parseInt(req.query.limit) || 15
     var clima = (req.query.clima) || null
     var provincia = (req.query.provincia) || null
     var tipoPlanta = (req.query.tipo_planta) || null
+    var nombrePlanta = (req.query.nombre) || ""       // Agregado parametro "nombrePlanta"
     
     // Lógica de paginado
     // Evita poner un previous_url si se encuentra en la 1er pag y un next_url si se encuentra en la ultima o es solo una pagina
@@ -28,9 +29,19 @@ const plantsController = {
       provincia === "null" ? provincia = null : decodeURIComponent(provincia)
       clima === "null" ? clima = null : decodeURIComponent(clima)
 
+      /* 
+      En el caso de que no se pase ningun nombre de planta por parametro, no se toma en cuenta y devuelve items organizados por paginacion y filtros. Caso contrario elimina la
+      paginacion, dado que ningun vegetal supera los 15 por pagina.
+      Esto es porque la llamada se realiza directamente con la solicitud de paginacion y hay un error cuando se busca una planta que queda fuera del limite de rows devueltas.
+      */
+      if (nombrePlanta != ""){
+        limit = null
+        nombrePlanta = nombrePlanta.charAt(0).toUpperCase() + nombrePlanta.slice(1).toLowerCase()
+      }
+      else limit = 15
       
-      const totalPags = await sql`SELECT * FROM filterBy(provincia_param => ${provincia}, clima_param => ${clima}, tipo_planta_param =>${tipoPlanta})`
-      const data = await sql`SELECT * FROM filterBy(offset_param => ${startIndex}, limit_param => ${limit}, provincia_param => ${provincia}, clima_param => ${clima}, tipo_planta_param =>${tipoPlanta})`
+      const totalPags = await sql`SELECT * FROM filterBy(provincia_param => ${provincia}, clima_param => ${clima}, tipo_planta_param =>${tipoPlanta}) WHERE nombre LIKE ${nombrePlanta} || '%'`
+      const data = await sql`SELECT * FROM filterBy(offset_param => ${startIndex}, limit_param => ${limit}, provincia_param => ${provincia}, clima_param => ${clima}, tipo_planta_param =>${tipoPlanta}) WHERE nombre LIKE ${nombrePlanta} || '%'`
       const paginado = {
         total: totalPags.length,
         items_per_page: limit == null ? 'all' : limit,
@@ -110,30 +121,13 @@ const plantsController = {
     }
   },
 
-  'getProvincias': async function (req, res) {
-    // Devuelve listado completo de provincias con su numero de Id
-    try {
-      const data = await sql`SELECT * FROM getProvinces()`
-      return res.send({ data })
-    } catch {
-      return res.status(500).send({ errors: [{ "status": 500, "title": "Internal error", "message": "Error del servidor, contáctese con el administrador" }] })
-    }
-  },
-
-  'getClimas': async function (req, res) {
+  'getSelectors': async function (req, res) {
     // Devuelve listado completo de climas con su numero de Id
     try {
-      const data = await sql`SELECT * FROM getWeathers()`
-      return res.send({ data })
-    } catch {
-      return res.status(500).send({ errors: [{ "status": 500, "title": "Internal error", "message": "Error del servidor, contáctese con el administrador" }] })
-    }
-  },
-
-  'getTiposPlanta': async function (req, res) {
-    // Devuelve listado completo de tipos de planta con su numero de Id
-    try {
-      const data = await sql`SELECT * FROM getPlantTypes()`
+      const data = []
+      data.push({"climas": await sql `SELECT * FROM getWeathers()`})
+      data.push({"tipos_planta": await sql `SELECT * FROM getPlantTypes()`})
+      data.push({"provincias": await sql `SELECT * FROM getProvinces()`})
       return res.send({ data })
     } catch {
       return res.status(500).send({ errors: [{ "status": 500, "title": "Internal error", "message": "Error del servidor, contáctese con el administrador" }] })
