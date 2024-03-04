@@ -39,8 +39,8 @@ const plantsController = {
         nombrePlanta = nombrePlanta.charAt(0).toUpperCase() + nombrePlanta.slice(1).toLowerCase()
       }
       
-      const totalPags = await sql`SELECT * FROM filterBy(provincia_param => ${provincia}, clima_param => ${clima}, tipo_planta_param =>${tipoPlanta}) WHERE nombre LIKE ${nombrePlanta} || '%'`
-      const data = await sql`SELECT * FROM filterBy(offset_param => ${startIndex}, limit_param => ${limit}, provincia_param => ${provincia}, clima_param => ${clima}, tipo_planta_param =>${tipoPlanta}) WHERE nombre LIKE ${nombrePlanta} || '%'`
+      const totalPags = await sql`SELECT * FROM filterBy(provincia_param => ${provincia}, clima_param => ${clima}, tipo_planta_param =>${tipoPlanta}) WHERE nombre LIKE '%' || ${nombrePlanta} || '%'`
+      const data = await sql`SELECT * FROM filterBy(offset_param => ${startIndex}, limit_param => ${limit}, provincia_param => ${provincia}, clima_param => ${clima}, tipo_planta_param =>${tipoPlanta}) WHERE nombre LIKE '%' || ${nombrePlanta} || '%'`
       const paginado = {
         total: totalPags.length,
         items_per_page: limit == null ? 'all' : limit,
@@ -182,7 +182,7 @@ const plantsController = {
     try {
       capWord = req.charAt(0).toUpperCase() + req.slice(1).toLowerCase()
       console.log(capWord)
-      var getCardList = await sql `SELECT * FROM getCards(limit_val => 100) WHERE nombre LIKE ${capWord} || '%'`
+      var getCardList = await sql `SELECT * FROM getCards(limit_val => 100) WHERE nombre LIKE '%'|| ${capWord} || '%'`
       var totalElements = Object.keys(getCardList).length
 
       if(totalElements == 0) return res.status(404).send({errors: [{"status" : 404, "title" : "Not Found", "message" : "No se ha encontrado ninguna especie que tenga ese nombre"}]}) 
