@@ -18,14 +18,17 @@ const userController = {
     try {
       const data = await sql`SELECT * FROM usuarios WHERE usuario = ${usuario}`
       const user = data[0]
-
       if (data.length === 0) {
         return res.status(409).send({ errors: [{ status: "409", title: "Conflict", message: 'El usuario no existe' }] })
       }
       else if (bcrypt.compareSync(password, user.pass)) {
         const token = generateToken(user)
-        send.data = { type: 'response', attributes: { status: "200", title: "Transaction OK", message: 'Sesión iniciada' } }
-        res.cookie('jwt', token)
+        const userData = {
+          usuario: user.usuario,
+          nombre_usuario: user.nombre_usuario
+        }
+        send.data = { type: 'response', attributes: { status: "200", title: "Transaction OK", message: 'Sesión iniciada', user: userData } }
+        res.cookie('jwt', token, { expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), httpOnly: true })
       }
       else {
         send.errors = [{ status: "409", title: "Conflict", message: 'Usuario o contraseña incorrectos' }]
@@ -184,7 +187,7 @@ const userController = {
     try {
       // Compara ambas contraseñas, la ingresada con la hasheada en la BDD
       if (!bcrypt.compareSync(passwordActual, userData.pass)) {
-        return res.status(409).send({ errors: [{ "status": 409, "title": "Conflict","message": "Password incorrecto" }] })}
+        return res.send({ errors: [{ "status": 409, "title": "Conflict","message": "Password incorrecto" }] })}
 
       else {
         // Si la comparacion es exitosa, realiza un nuevo hasheo de la contraseña ingresada y la modifica en la BDD
