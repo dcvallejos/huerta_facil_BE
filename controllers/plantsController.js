@@ -34,7 +34,7 @@ const plantsController = {
       paginacion, dado que ningun vegetal supera los 15 por pagina.
       Esto es porque la llamada se realiza directamente con la solicitud de paginacion y hay un error cuando se busca una planta que queda fuera del limite de rows devueltas.
       */
-      if (nombrePlanta != ""){
+      if (nombrePlanta != null || nombrePlanta != "null" || nombrePlanta != ""){
         limit = null
         nombrePlanta = nombrePlanta.charAt(0).toUpperCase() + nombrePlanta.slice(1).toLowerCase()
       }
