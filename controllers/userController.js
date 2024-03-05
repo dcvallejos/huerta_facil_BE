@@ -210,6 +210,7 @@ const userController = {
   'logout': function (req, res) {
     // solo verifica que haya una cookie (cualquiera con titulo jwt) para poder cerrar la sesion
     const inSession = req.cookies.jwt
+    console.log(req.cookies)
     if (inSession) {
       res.clearCookie("jwt")
       res.status(200).send({ data: [{ 'status': 200, 'title': 'Transaction OK', 'Message': 'Sesion correctamente cerrada' }] })
