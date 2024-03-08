@@ -38,10 +38,7 @@ const app = express()
 // setup
 app.use(morgan('dev'))
 app.use(express.json())
-app.use(cors({
-  origin: [], // Permitir solicitudes desde este origen
-  credentials: true // Permitir el envío de cookies de origen cruzado
-}));
+app.use(cors());
 app.use(express.urlencoded({extended: false}))
 app.use(express.static(path.join(__dirname, 'public')))
 app.use(methodoverride('_method'))
