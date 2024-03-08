@@ -38,7 +38,10 @@ const app = express()
 // setup
 app.use(morgan('dev'))
 app.use(express.json())
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:5174', 'http://localhost:5173', 'https://huertafacil.netlify.app', 'https://huertafacilprueba.netlify.app', 'https://huertafacilfe-production-1804.up.railway.app/'], // Permitir solicitudes desde este origen
+  credentials: true // Permitir el envío de cookies de origen cruzado
+}));
 app.use(express.urlencoded({extended: false}))
 app.use(express.static(path.join(__dirname, 'public')))
 app.use(methodoverride('_method'))
