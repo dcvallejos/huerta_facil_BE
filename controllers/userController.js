@@ -27,8 +27,8 @@ const userController = {
           usuario: user.usuario,
           nombre_usuario: user.nombre_usuario
         }
-        send.data = { type: 'response', attributes: { status: "200", title: "Transaction OK", message: 'Sesión iniciada', user: userData } }
-        res.cookie('jwt', token, { expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), httpOnly: true })
+        send.data = { type: 'response', attributes: { status: "200", title: "Transaction OK", message: 'Sesión iniciada', user: userData, token:token } }
+        //res.cookie('jwt', token, { expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), httpOnly: true })
       }
       else {
         send.errors = [{ status: "409", title: "Conflict", message: 'Usuario o contraseña incorrectos' }]

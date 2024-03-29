@@ -8,6 +8,7 @@ const tokenFunctions = {
   },
   "validateToken": (req, res, next) => {
     const accessToken = req.cookies.jwt
+    console.log(accessToken)
     if (!accessToken) {
       return res.status(401).send({ errors: [{ status: "401", title: "unauthorized", message: 'No autorizado' }] })
     }
